@@ -14,5 +14,6 @@ setup(
     author='M. Nguyen',
     author_email='martinnguyen20494@gmail.com',
     packages=find_packages(where='src'),
+    include=["mypackage*"],
     python_requires=">=3.8"
 )
