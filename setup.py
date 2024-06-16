@@ -13,7 +13,7 @@ setup(
                 "bathymetry estimation",
     author='M. Nguyen',
     author_email='martinnguyen20494@gmail.com',
-    packages=find_packages(where='src'),
-    include=["mypackage*"],
+    packages=find_packages(where="src"),
+    include=["floodunes*"],
     python_requires=">=3.8"
 )
