@@ -72,7 +72,7 @@ from datashader.transfer_functions import shade
 from datashader.transfer_functions import stack
 
 
-from rasterArray import xyz_array, zo_to_n
+from .rasterArray import xyz_array, zo_to_n
 
 
 class dataCollection:

@@ -66,8 +66,8 @@ from typing import Any, Optional
 import torch.nn as nn
 from torch import Tensor
 
-from dataCollection import dataCollection
-from rasterArray import blockshaped
+from .dataCollection import dataCollection
+from .rasterArray import blockshaped
 
 # Ref: https://wandb.ai/sauravmaheshkar/RSNA-MICCAI/reports/How-to-Set-Random-Seeds-in-PyTorch-and-Tensorflow--VmlldzoxMDA2MDQy
 def set_seed(seed: int = 42) -> None:

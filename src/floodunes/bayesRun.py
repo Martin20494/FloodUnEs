@@ -66,11 +66,11 @@ from typing import Any, Optional
 import torch.nn as nn
 from torch import Tensor
 
-from dataCollection import dataCollection
-from rasterArray import blockshaped
-from bayesFuncClassification import BayesianNetwork, minibatch_weight
-from bayesFuncRegression import MLP_BBB
-from dataPrep import dataPreparation
+from .dataCollection import dataCollection
+from .rasterArray import blockshaped
+from .bayesFuncClassification import BayesianNetwork, minibatch_weight
+from .bayesFuncRegression import MLP_BBB
+from .dataPrep import dataPreparation
 
 torch.set_default_dtype(torch.float64)
 

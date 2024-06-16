@@ -1,4 +1,4 @@
-from bayesPrepClassification import *
+from .bayesPrepClassification import *
 import torch.nn.functional as F
 
 # Ref: https://wandb.ai/sauravmaheshkar/RSNA-MICCAI/reports/How-to-Set-Random-Seeds-in-PyTorch-and-Tensorflow--VmlldzoxMDA2MDQy
