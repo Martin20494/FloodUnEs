@@ -1,77 +1,23 @@
-# Pytorch packages
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.nn import Parameter
-from torch.distributions import Normal
-from torch import Tensor
-from torch.utils.data import Dataset, DataLoader
-from sklearn.metrics import mean_squared_error
-
-from torch.utils.data import WeightedRandomSampler
-from torchvision import datasets
-from torchvision import transforms
-
-# Spatial raster visualisation packages
-import datashader as ds
-from datashader.transfer_functions import shade
-from datashader.transfer_functions import stack
-from datashader.transfer_functions import dynspread
-from datashader.transfer_functions import set_background
-from datashader.colors import Elevation
-
-import xrspatial
-from xrspatial import proximity
-
-import richdem as rd # for slope
-
-from scipy import ndimage
-
 # Raster manipulation packages
 import rioxarray as rxr
 from scipy.interpolate import griddata
 import xarray as xr
-from shapely.geometry import Polygon
-import geopandas as gpd
-import pandas as pd
-
-# Visualisation packages
-import matplotlib.pyplot as plt
-import seaborn as sns
-from matplotlib import colors
-import seaborn as sns
+import richdem as rd # for slope
 
 # Data manipulation packages
 import numpy as np
 import pandas as pd
 
-# Sklearn packages
-from sklearn.model_selection import train_test_split
-
-# Other files
-import random
-import csv
-import math
+# Path package
 import pathlib
 
-# Sort out stuck issue with pytorch
-import os
-
-# For variational approximator
-from typing import Any, Optional
-import torch.nn as nn
-from torch import Tensor
-
+# Image packages
 from skimage import feature
 from scipy.ndimage import generate_binary_structure
 from scipy import ndimage
+from xrspatial import proximity
 
-
-from datashader.transfer_functions import shade
-from datashader.transfer_functions import stack
-
-
+# Other packages
 from .rasterArray import xyz_array, zo_to_n
 
 
@@ -920,7 +866,7 @@ class dataCollection:
 
     
     
-    def loadpara_into_dataframe_classification(self):
+    def loadpara_into_dataframe_classification(self, name_csv='train'):
         
         # Call out each para
         # DEM - include 3 columns - x, y, dem - so the next para will be counted from 3
@@ -981,11 +927,11 @@ class dataCollection:
             )
 
         # Write out csv
-        ml_df.to_csv(fr"{self.general_folder}\ml_df_classification_proportion.csv", index=False)
+        ml_df.to_csv(fr"{self.general_folder}\ml_full_{name_csv}_df_classification_proportion.csv", index=False)
 
         return ml_df
 
-    def loadpara_into_dataframe_regression_proportion(self):
+    def loadpara_into_dataframe_regression_proportion(self, name_csv='train'):
 
         # Call out each para
         # DEM - include 3 columns - x, y, dem - so the next para will be counted from 3
@@ -1050,12 +996,12 @@ class dataCollection:
             )
 
         # Write out csv
-        ml_df.to_csv(fr"{self.general_folder}\ml_df_regression_proportion.csv", index=False)
+        ml_df.to_csv(fr"{self.general_folder}\ml_full_{name_csv}_df_regression_proportion.csv", index=False)
 
         return ml_df
 
 
-    def loadpara_into_dataframe_regression_sd(self):
+    def loadpara_into_dataframe_regression_sd(self, name_csv='train'):
 
         # Call out each para
         # Depth includes 3 columns - x, y, depth - so the next para will be counted from 3
@@ -1112,7 +1058,7 @@ class dataCollection:
             )
 
         # Write out csv
-        ml_df.to_csv(fr"{self.general_folder}\ml_df_regression_sd.csv", index=False)
+        ml_df.to_csv(fr"{self.general_folder}\ml_full_{name_csv}_df_regression_sd.csv", index=False)
 
         return ml_df
 

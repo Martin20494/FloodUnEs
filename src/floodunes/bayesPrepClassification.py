@@ -1,19 +1,16 @@
 # Pytorch packages
 import torch
+import torch.nn as nn
+from torch import Tensor
 
 # Data manipulation packages
 import numpy as np
-
-# Other files
-import random
 
 # Sort out stuck issue with pytorch
 import os
 
 # For variational approximator
 from typing import Any, Optional
-import torch.nn as nn
-from torch import Tensor
 
 # Initial preparation
 # Ref: https://github.com/pytorch/pytorch/issues/2155

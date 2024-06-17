@@ -1,73 +1,23 @@
 # Pytorch packages
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-from torch.nn import Parameter
-from torch.distributions import Normal
-from torch import Tensor
-from torch.utils.data import Dataset, DataLoader
-from sklearn.metrics import mean_squared_error
-
-from torch.utils.data import WeightedRandomSampler
-from torchvision import datasets
-from torchvision import transforms
-
-# Spatial raster visualisation packages
-import datashader as ds
-from datashader.transfer_functions import shade
-from datashader.transfer_functions import stack
-from datashader.transfer_functions import dynspread
-from datashader.transfer_functions import set_background
-from datashader.colors import Elevation
-
-import xrspatial
-from xrspatial import proximity
-
-import richdem as rd # for slope
-
-from scipy import ndimage
-
-# Raster manipulation packages
-import rioxarray as rxr
-from scipy.interpolate import griddata
-import xarray as xr
-from shapely.geometry import Polygon
-import geopandas as gpd
-import pandas as pd
-
-# Visualisation packages
-import matplotlib.pyplot as plt
-import seaborn as sns
-from matplotlib import colors
-import seaborn as sns
+import torch.nn as nn
 
 # Data manipulation packages
 import numpy as np
-import pandas as pd
 
 # Sklearn packages
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix, accuracy_score
+from sklearn.metrics import confusion_matrix
 
-# Other files
+# Random package
 import random
-import csv
-import math
-import pathlib
 
 # Path
 import os
 import json
 from pathlib import Path
 
-# For variational approximator
-from typing import Any, Optional
-import torch.nn as nn
-from torch import Tensor
-
-from .dataCollection import dataCollection
-from .rasterArray import blockshaped
+# Other packages
 from .bayesFuncClassification import BayesianNetwork, minibatch_weight
 from .bayesFuncRegression import MLP_BBB
 from .dataPrep import dataPreparation
@@ -92,46 +42,47 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 class runBayesClassification():
 
     def __init__(self,
-                 parameter_path_train,
+                 parameter_path,
                  setseed=2,
                  number_layers=9,
                  lr=1e-4,
                  batchsize=16*16,
-                 num_workers=1,
-                 parameter_path_test=None
+                 num_workers=1
                  ):
 
         # Set up set seed
         self.setseed = setseed
 
         # Set up parameters for getting data
-        self.parameter_path_train = parameter_path_train
+        with open(parameter_path, "r") as para_path_r:
+            self.para_path = json.load(para_path_r)
         # Call out file of paths to get general path
         # Train, val, and perhaps test
-        if parameter_path_test != None:
-            with open(self.parameter_path_train, "r") as para_path_train:
-                para_path_train = json.load(para_path_train)
-            Path(fr"{para_path_train['general_folder']}\model_classification_proportion").mkdir(parents=True,
-                                                                                                exist_ok=True)
-            self.general_folder = fr"{para_path_train['general_folder']}\model_classification_proportion"
+        # Train
+        Path(fr"{self.para_path['train']['general_folder']}\model_classification_proportion").mkdir(
+                                                                                                        parents=True,
+                                                                                                        exist_ok=True)
+        self.train_folder = fr"{self.para_path['train']['general_folder']}\model_classification_proportion"
 
-            self.parameter_path_test = parameter_path_test
-            with open(self.parameter_path_test, "r") as para_path_test:
-                para_path_test = json.load(para_path_test)
-
+        if self.para_path['test'] != None:
+            # Test
+            Path(fr"{self.para_path['test']['general_folder']}\model_classification_proportion").mkdir(
+                                                                                                 parents=True,
+                                                                                                 exist_ok=True)
+            self.test_folder = fr"{self.para_path['test']['general_folder']}\model_classification_proportion"
 
             # Call data
-            data_preparation = dataPreparation(parameter_path_train, False, para_path_test, setseed=self.setseed)
+            data_preparation = dataPreparation(self.para_path, False, setseed=self.setseed)
 
         else:
-            with open(self.parameter_path_train, "r") as para_path_train:
-                para_path_train = json.load(para_path_train)
-            Path(fr"{para_path_train['general_folder']}\model_classification_proportion").mkdir(parents=True,
-                                                                                                exist_ok=True)
-            self.general_folder = fr"{para_path_train['general_folder']}\model_classification_proportion"
+            # Create test based on train
+            Path(fr"{self.para_path['train']['general_folder']}\model_classification_proportion").mkdir(
+                                                                                                    parents=True,
+                                                                                                    exist_ok=True)
+            self.test_folder = fr"{self.para_path['train']['general_folder']}\model_classification_proportion"
 
             # Call data
-            data_preparation = dataPreparation(parameter_path_train, True, None, setseed=self.setseed)
+            data_preparation = dataPreparation(self.para_path, True, setseed=self.setseed)
 
         # Set data loaders
         trainloader, valloader, testloader, class_weight_new = data_preparation.pixel_dataloader_classification(
@@ -153,34 +104,38 @@ class runBayesClassification():
 
 
         # Set up layers and model
-        self.model = BayesianNetwork(number_layers*1*1, 3, number_layers).to(device)
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
-        self.criterion = nn.CrossEntropyLoss(reduction='sum')
+        self.number_layers = number_layers
+        self.lr = lr
 
     def train_model(self, total_epochs):
 
+        train_model = BayesianNetwork(self.number_layers*1*1, 3, self.number_layers).to(device)
+        train_model_optimizer = torch.optim.Adam(train_model.parameters(), self.lr)
+        train_model_criterion = nn.CrossEntropyLoss(reduction='sum')
+
         class1_acc_final = 0
+        min_val_loss = np.Inf
         set_seed(self.setseed)
 
         for epoch in range(total_epochs):
 
             train_loss_total = 0.0
 
-            self.model.train()
+            train_model.train()
             for train_batchidx, (train_data, train_labels) in enumerate(self.trainloader):
                 train_labels = train_labels.type(torch.LongTensor)
                 train_data, train_labels = train_data.to(device), train_labels.to(device)
 
-                self.optimizer.zero_grad()
+                train_model_optimizer.zero_grad()
 
                 pi_weight = minibatch_weight(batch_idx=train_batchidx, num_batches=len(self.trainloader))
 
-                train_loss = self.model.elbo(
+                train_loss = train_model.elbo(
                     inputs=train_data,
                     targets=train_labels,
                     alpha=self.class_weight_new.to(device),
                     gamma=2,
-                    criterion=self.criterion,
+                    criterion=train_model_criterion,
                     n_samples=5,
                     w_complexity=pi_weight
                 )
@@ -188,7 +143,7 @@ class runBayesClassification():
                 train_loss_total += train_loss.item() * train_data.size(0)
 
                 train_loss.backward()
-                self.optimizer.step()
+                train_model_optimizer.step()
 
 
             correct = 0
@@ -198,22 +153,22 @@ class runBayesClassification():
             prediction_labels = []
             validation_labels = []
 
-            self.model.eval()
+            train_model.eval()
             with torch.no_grad():
                 for val_batchidx, (val_data, val_labels) in enumerate(self.valloader):
                     val_labels = val_labels.type(torch.LongTensor)
                     val_data, val_labels = val_data.to(device), val_labels.to(device)
 
-                    outputs = self.model(val_data)
+                    outputs = train_model(val_data)
 
                     pi_weight = minibatch_weight(batch_idx=val_batchidx, num_batches=len(self.valloader))
 
-                    val_loss = self.model.elbo(
+                    val_loss = train_model.elbo(
                         inputs=val_data,
                         targets=val_labels,
                         alpha=self.class_weight_new.to(device),
                         gamma=2,
-                        criterion=self.criterion,
+                        criterion=train_model_criterion,
                         n_samples=5,
                         w_complexity=pi_weight
                     )
@@ -258,14 +213,22 @@ class runBayesClassification():
             val_loss_total /= len(self.valloader.dataset)
 
             # Save model
-            if epoch >= 1500:
-                torch.save(self.model.state_dict(), fr'{self.general_folder}\trained_model_{epoch}.pt')
-                torch.save(self.model, fr'{self.general_folder}\full_model.pth')
+            if epoch >= 2000:
+                torch.save({
+                    'epoch': epoch,
+                    'train_loss_total': train_loss_total,
+                    'val_loss_total': val_loss_total,
+                    'class1_acc': class1_acc,
+                    'optimizer_state_dict': train_model_optimizer.state_dict(),
+                    'model_state_dict': train_model.state_dict()
+                }, fr"{self.train_folder}\trained_model_{epoch}.pt")
+                torch.save(train_model, fr"{self.train_folder}\full_model.pth")
 
             # Print results
-            print('\nMAYBE accuracy increased: {:.2f} -> {:.2f}%\n'
-                  ''.format(class1_acc_final, class1_acc))
-            class1_acc_final = class1_acc
+            if class1_acc > class1_acc_final:
+                print('\nMAYBE accuracy increased: {:.2f} -> {:.2f}%\n'
+                      ''.format(class1_acc_final, class1_acc))
+                class1_acc_final = class1_acc
 
             print(f'Epoch: {epoch:04} |'
                   f'TrainLoss: {train_loss_total:.2f} |'
@@ -276,33 +239,39 @@ class runBayesClassification():
                   f'YesAcc: {class2_acc:.2f}%\n')
 
 
-    def retrain_model(self, pretrained_model_path, epoch_range):
+    def retrain_model(self, pretrained_model_path, epoch_new):
 
-        class1_acc_final = 0
+
         set_seed(self.setseed)
 
-        # Call out pretrained model
-        self.model.load_state_dict(torch.load(fr"{pretrained_model_path}"))
+        checkpoint = torch.load(fr"{pretrained_model_path}")
+        retrain_model = BayesianNetwork(self.number_layers * 1 * 1, 3, self.number_layers).to(device)
+        retrain_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        retrain_model_optimizer = torch.optim.Adam(retrain_model.parameters(), self.lr)
+        retrain_model_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        retrain_model_criterion = nn.CrossEntropyLoss(reduction='sum')
 
-        for epoch in range(epoch_range[0], epoch_range[1], 1):
+        class1_acc_final = checkpoint['class1_acc']
 
-            train_loss_total = 0.0
+        for epoch in range(checkpoint['epoch']+1, epoch_new, 1):
 
-            self.model.train()
+            train_loss_total = checkpoint['train_loss_total']
+
+            retrain_model.train()
             for train_batchidx, (train_data, train_labels) in enumerate(self.trainloader):
                 train_labels = train_labels.type(torch.LongTensor)
                 train_data, train_labels = train_data.to(device), train_labels.to(device)
 
-                self.optimizer.zero_grad()
+                retrain_model_optimizer.zero_grad()
 
                 pi_weight = minibatch_weight(batch_idx=train_batchidx, num_batches=len(self.trainloader))
 
-                train_loss = self.model.elbo(
+                train_loss = retrain_model.elbo(
                     inputs=train_data,
                     targets=train_labels,
                     alpha=self.class_weight_new.to(device),
                     gamma=2,
-                    criterion=self.criterion,
+                    criterion=retrain_model_criterion,
                     n_samples=5,
                     w_complexity=pi_weight
                 )
@@ -310,32 +279,32 @@ class runBayesClassification():
                 train_loss_total += train_loss.item() * train_data.size(0)
 
                 train_loss.backward()
-                self.optimizer.step()
+                retrain_model_optimizer.step()
 
 
             correct = 0
             total = 0
-            val_loss_total = 0
+            val_loss_total = checkpoint['val_loss_total']
 
             prediction_labels = []
             validation_labels = []
 
-            self.model.eval()
+            retrain_model.eval()
             with torch.no_grad():
                 for val_batchidx, (val_data, val_labels) in enumerate(self.valloader):
                     val_labels = val_labels.type(torch.LongTensor)
                     val_data, val_labels = val_data.to(device), val_labels.to(device)
 
-                    outputs = self.model(val_data)
+                    outputs = retrain_model(val_data)
 
                     pi_weight = minibatch_weight(batch_idx=val_batchidx, num_batches=len(self.valloader))
 
-                    val_loss = self.model.elbo(
+                    val_loss = retrain_model.elbo(
                         inputs=val_data,
                         targets=val_labels,
                         alpha=self.class_weight_new.to(device),
                         gamma=2,
-                        criterion=self.criterion,
+                        criterion=retrain_model_criterion,
                         n_samples=5,
                         w_complexity=pi_weight
                     )
@@ -379,13 +348,21 @@ class runBayesClassification():
             train_loss_total /= len(self.trainloader.dataset)
             val_loss_total /= len(self.valloader.dataset)
 
-            torch.save(self.model.state_dict(), fr'{self.general_folder}\trained_model_{epoch}.pt')
-            torch.save(self.model, fr'{self.general_folder}\full_model.pth')
+            if epoch >= checkpoint['epoch'] + 1000:
+                torch.save({
+                    'epoch': epoch,
+                    'train_loss_total': train_loss_total,
+                    'val_loss_total': val_loss_total,
+                    'optimizer_state_dict': retrain_model_optimizer.state_dict(),
+                    'model_state_dict': retrain_model.state_dict()
+                }, fr"{self.train_folder}\trained_model_{epoch}.pt")
+                torch.save(retrain_model, fr"{self.train_folder}\full_model.pth")
 
             # Print results
-            print('\nMAYBE accuracy increased: {:.2f} -> {:.2f}%\n'
-                  ''.format(class1_acc_final, class1_acc))
-            class1_acc_final = class1_acc
+            if class1_acc > class1_acc_final:
+                print('\nMAYBE accuracy increased: {:.2f} -> {:.2f}%\n'
+                      ''.format(class1_acc_final, class1_acc))
+                class1_acc_final = class1_acc
 
             print(f'Epoch: {epoch:04} |'
                   f'TrainLoss: {train_loss_total:.2f} |'
@@ -403,13 +380,15 @@ class runBayesClassification():
         total = 0
         correct = 0
 
-        self.model.load_state_dict(torch.load(fr"{trained_model_path}"))
-        self.model.eval()
+        checkpoint = torch.load(fr"{trained_model_path}")
+        test_model = BayesianNetwork(self.number_layers * 1 * 1, 3, self.number_layers).to(device)
+        test_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
 
+        test_model.eval()
         for test_batchidx, (test_data, test_labels) in enumerate(self.testloader):
             test_labels = test_labels.type(torch.LongTensor)
             test_data, test_labels = test_data.to(device), test_labels.to(device)
-            outputs = self.model(test_data)
+            outputs = test_model(test_data)
 
             probabilities = F.softmax(outputs)
             _, predicted = torch.max(probabilities.data, 1)
@@ -436,44 +415,47 @@ class runBayesClassification():
 class runBayesRegressionProportion():
 
     def __init__(self,
-                 parameter_path_train,
+                 parameter_path,
                  setseed=2,
                  number_layers=10,
                  lr=0.001,
                  batchsize=3200,
                  num_workers=1,
-                 parameter_path_test=None,
                  resample=False
                  ):
         # Set up set seed
         self.setseed = setseed
 
         # Set up parameters for getting data
-        self.parameter_path_train = parameter_path_train
+        with open(parameter_path, "r") as para_path_r:
+            self.para_path = json.load(para_path_r)
         # Call out file of paths to get general path
         # Train, val, and perhaps test
-        if parameter_path_test != None:
-            with open(self.parameter_path_train, "r") as para_path_train:
-                para_path_train = json.load(para_path_train)
-            Path(fr"{para_path_train['general_folder']}\model_regression_proportion").mkdir(parents=True, exist_ok=True)
-            self.general_folder = fr"{para_path_train['general_folder']}\model_regression_proportion"
+        # Train
+        Path(fr"{self.para_path['train']['general_folder']}\model_regression_proportion").mkdir(
+            parents=True,
+            exist_ok=True)
+        self.train_folder = fr"{self.para_path['train']['general_folder']}\model_regression_proportion"
 
-            self.parameter_path_test = parameter_path_test
-            with open(self.parameter_path_test, "r") as para_path_test:
-                para_path_test = json.load(para_path_test)
-
+        if self.para_path['test'] != None:
+            # Test
+            Path(fr"{self.para_path['test']['general_folder']}\model_regression_proportion").mkdir(
+                parents=True,
+                exist_ok=True)
+            self.test_folder = fr"{self.para_path['test']['general_folder']}\model_regression_proportion"
 
             # Call data
-            data_preparation = dataPreparation(parameter_path_train, False, para_path_test, setseed=self.setseed)
+            data_preparation = dataPreparation(self.para_path, False, setseed=self.setseed)
 
         else:
-            with open(self.parameter_path_train, "r") as para_path_train:
-                para_path_train = json.load(para_path_train)
-            Path(fr"{para_path_train['general_folder']}\model_regression_proportion").mkdir(parents=True, exist_ok=True)
-            self.general_folder = fr"{para_path_train['general_folder']}\model_regression_proportion"
+            # Create test based on train
+            Path(fr"{self.para_path['train']['general_folder']}\model_regression_proportion").mkdir(
+                parents=True,
+                exist_ok=True)
+            self.test_folder = fr"{self.para_path['train']['general_folder']}\model_regression_proportion"
 
             # Call data
-            data_preparation = dataPreparation(parameter_path_train, True, None, setseed=self.setseed)
+            data_preparation = dataPreparation(self.para_path, True, setseed=self.setseed)
 
         # Set data loaders
         trainloader, valloader, testloader = data_preparation.pixel_dataloader_regression_proportion(
@@ -494,40 +476,43 @@ class runBayesRegressionProportion():
 
 
         # Set up layers and model
-        self.model = MLP_BBB(number_layers, setseed=setseed).to(device)
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
+        self.number_layers = number_layers
+        self.lr = lr
 
     def train_model(self, total_epochs):
 
+        min_val_loss = np.Inf
+
         set_seed(self.setseed)
 
-        min_val_loss = np.Inf
+        train_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
+        train_model_optimizer = torch.optim.Adam(train_model.parameters(), lr=self.lr)
 
         for epoch in range(total_epochs):
             # Train
             train_loss_total = 0
-            self.model.train()
+            train_model.train()
 
             for train_batchidx, (train_xdata, train_ydata) in enumerate(self.trainloader):
                 train_xdata = train_xdata.to(device)
                 train_ydata = train_ydata.to(device)
-                train_loss = self.model.sample_elbo(train_xdata, train_ydata, 1)
+                train_loss = train_model.sample_elbo(train_xdata, train_ydata, 1)
                 train_loss_total += train_loss.item() * train_xdata.size(0)
 
-                self.optimizer.zero_grad()
+                train_model_optimizer.zero_grad()
                 train_loss.backward()
-                self.optimizer.step()
+                train_model_optimizer.step()
 
             # Validate
             val_loss_total = 0
-            self.model.eval()
+            train_model.eval()
 
             with torch.no_grad():
                 for val_batchidx, (val_xdata, val_ydata) in enumerate(self.valloader):
                     val_xdata = val_xdata.to(device)
                     val_ydata = val_ydata.to(device)
 
-                    val_loss = self.model.sample_elbo(val_xdata, val_ydata, 1)
+                    val_loss = train_model.sample_elbo(val_xdata, val_ydata, 1)
 
                     val_loss_total += val_loss.item() * val_ydata.size(0)
 
@@ -539,9 +524,16 @@ class runBayesRegressionProportion():
                       ''.format(min_val_loss, val_loss_total))
 
                 min_val_loss = val_loss_total
+
                 if epoch >= 100:
-                    torch.save(self.model.state_dict(), fr'{self.general_folder}\trained_model_{epoch}.pt')
-                    torch.save(self.model, fr'{self.general_folder}\full_model.pth')
+                    torch.save({
+                        'epoch': epoch,
+                        'train_loss_total': train_loss_total,
+                        'val_loss_total': val_loss_total,
+                        'optimizer_state_dict': train_model_optimizer.state_dict(),
+                        'model_state_dict': train_model.state_dict()
+                    }, fr"{self.train_folder}\trained_model_{epoch}.pt")
+                    torch.save(train_model, fr"{self.train_folder}\full_model.pth")
 
             _results = [epoch, train_loss_total, val_loss_total]
 
@@ -549,40 +541,43 @@ class runBayesRegressionProportion():
                   f'Train Loss: {train_loss_total:.3f} |'
                   f'Validation Loss: {val_loss_total:.3f}')
 
-    def retrain_model(self, pretrained_model_path, epoch_range):
+    def retrain_model(self, pretrained_model_path, epoch_new):
 
         min_val_loss = np.Inf
 
         set_seed(self.setseed)
 
-        # Call out pretrained model
-        self.model.load_state_dict(torch.load(fr"{pretrained_model_path}"))
+        checkpoint = torch.load(fr"{pretrained_model_path}")
+        retrain_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
+        retrain_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        retrain_model_optimizer = torch.optim.Adam(retrain_model.parameters(), lr=self.lr)
+        retrain_model_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
-        for epoch in range(epoch_range[0], epoch_range[1], 1):
+        for epoch in range(checkpoint['epoch'] + 1, epoch_new, 1):
             # Train
             train_loss_total = 0
-            self.model.train()
+            retrain_model.train()
 
             for train_batchidx, (train_xdata, train_ydata) in enumerate(self.trainloader):
                 train_xdata = train_xdata.to(device)
                 train_ydata = train_ydata.to(device)
-                train_loss = self.model.sample_elbo(train_xdata, train_ydata, 1)
+                train_loss = retrain_model.sample_elbo(train_xdata, train_ydata, 1)
                 train_loss_total += train_loss.item() * train_xdata.size(0)
 
-                self.optimizer.zero_grad()
+                retrain_model_optimizer.zero_grad()
                 train_loss.backward()
-                self.optimizer.step()
+                retrain_model_optimizer.step()
 
             # Validate
             val_loss_total = 0
-            self.model.eval()
+            retrain_model.eval()
 
             with torch.no_grad():
                 for val_batchidx, (val_xdata, val_ydata) in enumerate(self.valloader):
                     val_xdata = val_xdata.to(device)
                     val_ydata = val_ydata.to(device)
 
-                    val_loss = self.model.sample_elbo(val_xdata, val_ydata, 1)
+                    val_loss = retrain_model.sample_elbo(val_xdata, val_ydata, 1)
 
                     val_loss_total += val_loss.item() * val_ydata.size(0)
 
@@ -594,8 +589,15 @@ class runBayesRegressionProportion():
                       ''.format(min_val_loss, val_loss_total))
 
                 min_val_loss = val_loss_total
-                torch.save(self.model.state_dict(), fr'{self.general_folder}\trained_model_{epoch}.pt')
-                torch.save(self.model, fr'{self.general_folder}\full_model.pth')
+                if epoch >= checkpoint['epoch'] + 100:
+                    torch.save({
+                        'epoch': epoch,
+                        'train_loss_total': train_loss_total,
+                        'val_loss_total': val_loss_total,
+                        'optimizer_state_dict': retrain_model_optimizer.state_dict(),
+                        'model_state_dict': retrain_model.state_dict()
+                    }, fr"{self.train_folder}\trained_model_{epoch}.pt")
+                    torch.save(retrain_model, fr"{self.train_folder}\full_model.pth")
 
             _results = [epoch, train_loss_total, val_loss_total]
 
@@ -609,8 +611,10 @@ class runBayesRegressionProportion():
         test_list = []
         sd_list = []
 
-        self.model.load_state_dict(torch.load(fr"{trained_model_path}"))
-        self.model.eval()
+        checkpoint = torch.load(fr"{trained_model_path}")
+        test_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
+        test_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        test_model.eval()
 
         for test_batchidx, (test_xdata, test_ydata) in enumerate(self.testloader):
 
@@ -619,7 +623,7 @@ class runBayesRegressionProportion():
 
             # Get outputs
             set_seed(self.setseed)
-            outputs_lst = [self.model.forward(test_xdata).data.cpu().numpy().squeeze(1) for _ in range(100)]
+            outputs_lst = [test_model.forward(test_xdata).data.cpu().numpy().squeeze(1) for _ in range(100)]
 
             # Calculate mean
             output_T = np.array(outputs_lst).T
@@ -641,43 +645,47 @@ class runBayesRegressionProportion():
 class runBayesRegressionSD():
 
     def __init__(self,
-                 parameter_path_train,
+                 parameter_path,
                  setseed=2,
                  number_layers=8,
                  lr=0.001,
                  batchsize=3200,
                  num_workers=1,
-                 parameter_path_test=None,
                  resample=False
                  ):
         # Set up set seed
         self.setseed = setseed
 
         # Set up parameters for getting data
-        self.parameter_path_train = parameter_path_train
+        with open(parameter_path, "r") as para_path_r:
+            self.para_path = json.load(para_path_r)
         # Call out file of paths to get general path
         # Train, val, and perhaps test
-        if parameter_path_test != None:
-            with open(self.parameter_path_train, "r") as para_path_train:
-                para_path_train = json.load(para_path_train)
-            Path(fr"{para_path_train['general_folder']}\model_regression_SD").mkdir(parents=True, exist_ok=True)
-            self.general_folder = fr"{para_path_train['general_folder']}\model_regression_SD"
+        # Train
+        Path(fr"{self.para_path['train']['general_folder']}\model_regression_sd").mkdir(
+            parents=True,
+            exist_ok=True)
+        self.train_folder = fr"{self.para_path['train']['general_folder']}\model_regression_sd"
 
-            self.parameter_path_test = parameter_path_test
-            with open(self.parameter_path_test, "r") as para_path_test:
-                para_path_test = json.load(para_path_test)
+        if self.para_path['test'] != None:
+            # Test
+            Path(fr"{self.para_path['test']['general_folder']}\model_regression_sd").mkdir(
+                parents=True,
+                exist_ok=True)
+            self.test_folder = fr"{self.para_path['test']['general_folder']}\model_regression_sd"
 
             # Call data
-            data_preparation = dataPreparation(parameter_path_train, False, para_path_test, setseed=self.setseed)
+            data_preparation = dataPreparation(self.para_path, False, setseed=self.setseed)
 
         else:
-            with open(self.parameter_path_train, "r") as para_path_train:
-                para_path_train = json.load(para_path_train)
-            Path(fr"{para_path_train['general_folder']}\model_regression_SD").mkdir(parents=True, exist_ok=True)
-            self.general_folder = fr"{para_path_train['general_folder']}\model_regression_SD"
+            # Create test based on train
+            Path(fr"{self.para_path['train']['general_folder']}\model_regression_sd").mkdir(
+                parents=True,
+                exist_ok=True)
+            self.test_folder = fr"{self.para_path['train']['general_folder']}\model_regression_sd"
 
             # Call data
-            data_preparation = dataPreparation(parameter_path_train, True, None, setseed=self.setseed)
+            data_preparation = dataPreparation(self.para_path, True, setseed=self.setseed)
 
         # Set data loaders
         trainloader, valloader, testloader = data_preparation.pixel_dataloader_regression_sd(
@@ -697,40 +705,43 @@ class runBayesRegressionSD():
         self.kwargs = kwargs
 
         # Set up layers and model
-        self.model = MLP_BBB(number_layers, setseed=setseed).to(device)
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
+        self.number_layers = number_layers
+        self.lr = lr
 
     def train_model(self, total_epochs):
 
         set_seed(self.setseed)
+
+        train_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
+        train_model_optimizer = torch.optim.Adam(train_model.parameters(), lr=self.lr)
 
         min_val_loss = np.Inf
 
         for epoch in range(total_epochs):
             # Train
             train_loss_total = 0
-            self.model.train()
+            train_model.train()
 
             for train_batchidx, (train_xdata, train_ydata) in enumerate(self.trainloader):
                 train_xdata = train_xdata.to(device)
                 train_ydata = train_ydata.to(device)
-                train_loss = self.model.sample_elbo(train_xdata, train_ydata, 1)
+                train_loss = train_model.sample_elbo(train_xdata, train_ydata, 1)
                 train_loss_total += train_loss.item() * train_xdata.size(0)
 
-                self.optimizer.zero_grad()
+                train_model_optimizer.zero_grad()
                 train_loss.backward()
-                self.optimizer.step()
+                train_model_optimizer.step()
 
             # Validate
             val_loss_total = 0
-            self.model.eval()
+            train_model.eval()
 
             with torch.no_grad():
                 for val_batchidx, (val_xdata, val_ydata) in enumerate(self.valloader):
                     val_xdata = val_xdata.to(device)
                     val_ydata = val_ydata.to(device)
 
-                    val_loss = self.model.sample_elbo(val_xdata, val_ydata, 1)
+                    val_loss = train_model.sample_elbo(val_xdata, val_ydata, 1)
 
                     val_loss_total += val_loss.item() * val_ydata.size(0)
 
@@ -743,8 +754,14 @@ class runBayesRegressionSD():
 
                 min_val_loss = val_loss_total
                 if epoch >= 100:
-                    torch.save(self.model.state_dict(), fr'{self.general_folder}\trained_model_{epoch}.pt')
-                    torch.save(self.model, fr'{self.general_folder}\full_model.pth')
+                    torch.save({
+                        'epoch': epoch,
+                        'train_loss_total': train_loss_total,
+                        'val_loss_total': val_loss_total,
+                        'optimizer_state_dict': train_model_optimizer.state_dict(),
+                        'model_state_dict': train_model.state_dict()
+                    }, fr"{self.train_folder}\trained_model_{epoch}.pt")
+                    torch.save(train_model, fr"{self.train_folder}\full_model.pth")
 
             _results = [epoch, train_loss_total, val_loss_total]
 
@@ -752,40 +769,44 @@ class runBayesRegressionSD():
                   f'Train Loss: {train_loss_total:.3f} |'
                   f'Validation Loss: {val_loss_total:.3f}')
 
+
     def retrain_model(self, pretrained_model_path, epoch_range):
 
         min_val_loss = np.Inf
 
         set_seed(self.setseed)
 
-        # Call out pretrained model
-        self.model.load_state_dict(torch.load(fr"{pretrained_model_path}"))
+        checkpoint = torch.load(fr"{pretrained_model_path}")
+        retrain_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
+        retrain_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        retrain_model_optimizer = torch.optim.Adam(retrain_model.parameters(), lr=self.lr)
+        retrain_model_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
         for epoch in range(epoch_range[0], epoch_range[1], 1):
             # Train
             train_loss_total = 0
-            self.model.train()
+            retrain_model.train()
 
             for train_batchidx, (train_xdata, train_ydata) in enumerate(self.trainloader):
                 train_xdata = train_xdata.to(device)
                 train_ydata = train_ydata.to(device)
-                train_loss = self.model.sample_elbo(train_xdata, train_ydata, 1)
+                train_loss = retrain_model.sample_elbo(train_xdata, train_ydata, 1)
                 train_loss_total += train_loss.item() * train_xdata.size(0)
 
-                self.optimizer.zero_grad()
+                retrain_model_optimizer.zero_grad()
                 train_loss.backward()
-                self.optimizer.step()
+                retrain_model_optimizer.step()
 
             # Validate
             val_loss_total = 0
-            self.model.eval()
+            retrain_model.eval()
 
             with torch.no_grad():
                 for val_batchidx, (val_xdata, val_ydata) in enumerate(self.valloader):
                     val_xdata = val_xdata.to(device)
                     val_ydata = val_ydata.to(device)
 
-                    val_loss = self.model.sample_elbo(val_xdata, val_ydata, 1)
+                    val_loss = retrain_model.sample_elbo(val_xdata, val_ydata, 1)
 
                     val_loss_total += val_loss.item() * val_ydata.size(0)
 
@@ -797,8 +818,15 @@ class runBayesRegressionSD():
                       ''.format(min_val_loss, val_loss_total))
 
                 min_val_loss = val_loss_total
-                torch.save(self.model.state_dict(), fr'{self.general_folder}\trained_model_{epoch}.pt')
-                torch.save(self.model, fr'{self.general_folder}\full_model.pth')
+                if epoch >= checkpoint['epoch'] + 100:
+                    torch.save({
+                        'epoch': epoch,
+                        'train_loss_total': train_loss_total,
+                        'val_loss_total': val_loss_total,
+                        'optimizer_state_dict': retrain_model_optimizer.state_dict(),
+                        'model_state_dict': retrain_model.state_dict()
+                    }, fr"{self.train_folder}\trained_model_{epoch}.pt")
+                    torch.save(retrain_model, fr"{self.train_folder}\full_model.pth")
 
             _results = [epoch, train_loss_total, val_loss_total]
 
@@ -812,8 +840,10 @@ class runBayesRegressionSD():
         test_list = []
         sd_list = []
 
-        self.model.load_state_dict(torch.load(fr"{trained_model_path}"))
-        self.model.eval()
+        checkpoint = torch.load(fr"{trained_model_path}")
+        test_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
+        test_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        test_model.eval()
 
         for test_batchidx, (test_xdata, test_ydata) in enumerate(self.testloader):
             test_xdata = test_xdata.to(device)
@@ -821,7 +851,7 @@ class runBayesRegressionSD():
 
             # Get outputs
             set_seed(self.setseed)
-            outputs_lst = [self.model.forward(test_xdata).data.cpu().numpy().squeeze(1) for _ in range(100)]
+            outputs_lst = [test_model.forward(test_xdata).data.cpu().numpy().squeeze(1) for _ in range(100)]
 
             # Calculate mean
             output_T = np.array(outputs_lst).T

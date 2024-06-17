@@ -1,5 +1,6 @@
 from .bayesPrepClassification import *
 import torch.nn.functional as F
+import random
 
 # Ref: https://wandb.ai/sauravmaheshkar/RSNA-MICCAI/reports/How-to-Set-Random-Seeds-in-PyTorch-and-Tensorflow--VmlldzoxMDA2MDQy
 def set_seed(seed: int = 42) -> None:

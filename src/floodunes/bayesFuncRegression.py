@@ -1,61 +1,21 @@
-import csv
-import math
+# Pytorch packages
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-from torch.nn import Parameter
 from torch.distributions import Normal
-from torch import Tensor
-from torch.utils.data import Dataset, DataLoader
-from sklearn.metrics import mean_squared_error
 
-from torch.utils.data import WeightedRandomSampler
-
-from torch.autograd import Variable
-
-from torchvision import datasets
-from torchvision import transforms
-
-import datashader as ds
-from datashader.transfer_functions import shade
-from datashader.transfer_functions import stack
-from datashader.transfer_functions import dynspread
-from datashader.transfer_functions import set_background
-from datashader.colors import Elevation
-
-import xrspatial
-from xrspatial import proximity
-
-from scipy import ndimage
-
-from sklearn.metrics import confusion_matrix, accuracy_score, mean_absolute_error
-
+# Data manipulation package
 import numpy as np
-import math
+
+# Random package
 import random
-
-import rioxarray as rxr
-import xarray as xr
-
-import richdem as rd # for slope
-
-import pandas as pd
-from sklearn.model_selection import train_test_split
-
-import matplotlib.pyplot as plt
-from matplotlib import colors
-import seaborn as sns
-
-import matplotlib.pyplot as plt
 
 # Ref: https://github.com/pytorch/pytorch/issues/2155
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
-from typing import Any, Optional
-
-import resreg
+# For variational approximator
+from typing import Optional
 
 
 # Ref: https://wandb.ai/sauravmaheshkar/RSNA-MICCAI/reports/How-to-Set-Random-Seeds-in-PyTorch-and-Tensorflow--VmlldzoxMDA2MDQy

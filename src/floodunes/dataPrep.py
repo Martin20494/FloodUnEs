@@ -1,71 +1,27 @@
 # Pytorch packages
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-from torch.nn import Parameter
-from torch.distributions import Normal
-from torch import Tensor
 from torch.utils.data import Dataset, DataLoader
-from sklearn.metrics import mean_squared_error
-
 from torch.utils.data import WeightedRandomSampler
-from torchvision import datasets
-from torchvision import transforms
-
-# Spatial raster visualisation packages
-import datashader as ds
-from datashader.transfer_functions import shade
-from datashader.transfer_functions import stack
-from datashader.transfer_functions import dynspread
-from datashader.transfer_functions import set_background
-from datashader.colors import Elevation
-
-import xrspatial
-from xrspatial import proximity
-
-import richdem as rd # for slope
-
-from scipy import ndimage
-
-# Raster manipulation packages
-import rioxarray as rxr
-from scipy.interpolate import griddata
-import xarray as xr
-from shapely.geometry import Polygon
-import geopandas as gpd
-import pandas as pd
 
 # Visualisation packages
 import matplotlib.pyplot as plt
-import seaborn as sns
-from matplotlib import colors
-import seaborn as sns
 
 # Data manipulation packages
 import numpy as np
-import pandas as pd
 
 # Sklearn packages
 from sklearn.model_selection import train_test_split
 
-# Other files
+# Random package
 import random
-import csv
-import math
-import pathlib
 
+# Oversampling package
 import resreg
 
 # Path
 import os
-import json
 
-# For variational approximator
-from typing import Any, Optional
-import torch.nn as nn
-from torch import Tensor
-
+# Other packages
 from .dataCollection import dataCollection
 from .rasterArray import blockshaped
 
@@ -253,94 +209,84 @@ class Pixel():
 
 
 class dataPreparation:
-    def __init__(self, parameter_path_train, split=True, parameter_path_test=None, setseed=2):
+    def __init__(self, parameter_path, split=True, setseed=2):
 
-        self.parameter_path_train = parameter_path_train
+        self.para_path = parameter_path
         self.split = split
-        self.parameter_path_test = parameter_path_test
         self.setseed = setseed
-
 
 
     def split_data_classification(self):
 
-        # Read json file to find out all parameter path
-        with open(self.parameter_path_train, "r") as para_path_train:
-            para_path = json.load(para_path_train)
-
-        # Collect data from paths
-        para_collection = dataCollection(
-            para_path['general_folder'],
-            para_path['geometry_domain_list'],
-            para_path['path_elev'],
-            para_path['path_wd'],
-            para_path['path_wse'],
-            para_path['path_proportion'],
-            para_path['path_manning'],
-            para_path['path_roughness'],
-            para_path['path_sd']
+        # Get train collection
+        train_collection = dataCollection(
+            self.para_path['train']['general_folder'],
+            self.para_path['train']['geometry_domain_list'],
+            self.para_path['train']['path_elev'],
+            self.para_path['train']['path_wd'],
+            self.para_path['train']['path_wse'],
+            self.para_path['train']['path_proportion'],
+            self.para_path['train']['path_manning'],
+            self.para_path['train']['path_roughness'],
+            self.para_path['train']['path_sd']
         )
 
         # Get dataframe for machine learning
-
-        ml_df = para_collection.loadpara_into_dataframe_classification()
+        ml_train_df = train_collection.loadpara_into_dataframe_classification()
 
         if self.split == True:
+
             # Split data into train, validation, and test IF SPLIT = TRUE
-            train_val_df, test_df = train_test_split(ml_df, random_state=42, train_size=0.8, shuffle=True)
+            train_val_df, test_df = train_test_split(ml_train_df, random_state=42, train_size=0.8, shuffle=True)
             train_df, val_df = train_test_split(train_val_df, random_state=42, train_size=0.75, shuffle=True)
 
             # Write out just incase
-            train_df.to_csv(fr"{para_path['general_folder']}\train_df_classification.csv", index=False)
-            val_df.to_csv(fr"{para_path['general_folder']}\val_df_classification.csv", index=False)
-            test_df.to_csv(fr"{para_path['general_folder']}\test_df_classification.csv", index=False)
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_classification.csv", index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_classification.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['train']['general_folder']}\test_df_classification.csv", index=False)
 
             # Flatten data
-            x_train_flatten_channel = train_df.loc[:, list(ml_df.columns[2:11])].to_numpy().T
-            y_train_flatten_channel = train_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:11])].to_numpy().T
+            y_train_flatten_channel = train_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_val_flatten_channel = val_df.loc[:, list(ml_df.columns[2:11])].to_numpy().T
-            y_val_flatten_channel = val_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_val_flatten_channel = val_df.loc[:, list(ml_train_df.columns[2:11])].to_numpy().T
+            y_val_flatten_channel = val_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_test_flatten_channel = test_df.loc[:, list(ml_df.columns[2:11])].to_numpy().T
-            y_test_flatten_channel = test_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_test_flatten_channel = test_df.loc[:, list(ml_train_df.columns[2:11])].to_numpy().T
+            y_test_flatten_channel = test_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
 
         else:
             # Split data into train and validation only IF SPLIT = FALSE
-            train_df, val_df = train_test_split(ml_df, random_state=42, train_size=0.8, shuffle=True)
+            train_df, val_df = train_test_split(ml_train_df, random_state=42, train_size=0.8, shuffle=True)
 
-            # Read json file to find out all parameter path
-            with open(self.parameter_path_test, "r") as para_path_test:
-                para_path = json.load(para_path_test)
-
-            # Collect data from paths
-            para_collection = dataCollection(
-                para_path['general_folder'],
-                para_path['geometry_domain_list'],
-                para_path['path_elev'],
-                para_path['path_wd'],
-                para_path['path_wse'],
-                para_path['path_proportion'],
-                para_path['path_manning'],
-                para_path['roughness'],
-                para_path['path_sd']
+            # Get test collection
+            test_collection = dataCollection(
+                self.para_path['test']['general_folder'],
+                self.para_path['test']['geometry_domain_list'],
+                self.para_path['test']['path_elev'],
+                self.para_path['test']['path_wd'],
+                self.para_path['test']['path_wse'],
+                self.para_path['test']['path_proportion'],
+                self.para_path['test']['path_manning'],
+                self.para_path['test']['path_roughness'],
+                self.para_path['test']['path_sd']
             )
 
             # Get dataframe for machine learning
-            test_df = para_collection.loadpara_into_dataframe_classification()
+            test_df = test_collection.loadpara_into_dataframe_classification(name_csv='test')
 
             # Write out just incase
-            train_df.to_csv(fr"{para_path['general_folder']}\train_df_classification.csv", index=False)
-            val_df.to_csv(fr"{para_path['general_folder']}\val_df_classification.csv", index=False)
-            test_df.to_csv(fr"{para_path['general_folder']}\test_df_classification.csv", index=False)
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_classification.csv", index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_classification.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['test']['general_folder']}\test_df_classification.csv", index=False)
 
             # Flatten data
-            x_train_flatten_channel = train_df.loc[:, list(ml_df.columns[2:11])].to_numpy().T
-            y_train_flatten_channel = train_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:11])].to_numpy().T
+            y_train_flatten_channel = train_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_val_flatten_channel = val_df.loc[:, list(ml_df.columns[2:11])].to_numpy().T
-            y_val_flatten_channel = val_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_val_flatten_channel = val_df.loc[:, list(ml_train_df.columns[2:11])].to_numpy().T
+            y_val_flatten_channel = val_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
             x_test_flatten_channel = test_df.loc[:, list(test_df.columns[2:11])].to_numpy().T
             y_test_flatten_channel = test_df.loc[:, test_df.columns[-1]].to_numpy().T
@@ -446,83 +392,77 @@ class dataPreparation:
 
     def split_data_regression_proportion(self, resample=False):
 
-        # Read json file to find out all parameter path
-        with open(self.parameter_path_train, "r") as para_path_train:
-            para_path = json.load(para_path_train)
-
-        # Collect data from paths
-        para_collection = dataCollection(
-            para_path['general_folder'],
-            para_path['geometry_domain_list'],
-            para_path['path_elev'],
-            para_path['path_wd'],
-            para_path['path_wse'],
-            para_path['path_proportion'],
-            para_path['path_manning'],
-            para_path['path_roughness'],
-            para_path['path_sd']
+        # Get train collection
+        train_collection = dataCollection(
+            self.para_path['train']['general_folder'],
+            self.para_path['train']['geometry_domain_list'],
+            self.para_path['train']['path_elev'],
+            self.para_path['train']['path_wd'],
+            self.para_path['train']['path_wse'],
+            self.para_path['train']['path_proportion'],
+            self.para_path['train']['path_manning'],
+            self.para_path['train']['path_roughness'],
+            self.para_path['train']['path_sd']
         )
 
         # Get dataframe for machine learning
-
-        ml_df = para_collection.loadpara_into_dataframe_regression_proportion()
+        ml_train_df = train_collection.loadpara_into_dataframe_regression_proportion()
 
         if self.split == True:
+
             # Split data into train, validation, and test IF SPLIT = TRUE
-            train_val_df, test_df = train_test_split(ml_df, random_state=42, train_size=0.8, shuffle=True)
+            train_val_df, test_df = train_test_split(ml_train_df, random_state=42, train_size=0.8, shuffle=True)
             train_df, val_df = train_test_split(train_val_df, random_state=42, train_size=0.75, shuffle=True)
 
             # Write out just incase
-            train_df.to_csv(fr"{para_path['general_folder']}\train_df_regression_proportion.csv", index=False)
-            val_df.to_csv(fr"{para_path['general_folder']}\val_df_regression_proportion.csv", index=False)
-            test_df.to_csv(fr"{para_path['general_folder']}\test_df_regression_proportion.csv", index=False)
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_regression_proportion.csv",
+                            index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_regression_proportion.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['train']['general_folder']}\test_df_regression_proportion.csv", index=False)
 
             # Flatten data
-            x_train_flatten_channel = train_df.loc[:, list(ml_df.columns[2:12])].to_numpy().T
-            y_train_flatten_channel = train_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:12])].to_numpy().T
+            y_train_flatten_channel = train_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_val_flatten_channel = val_df.loc[:, list(ml_df.columns[2:12])].to_numpy().T
-            y_val_flatten_channel = val_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_val_flatten_channel = val_df.loc[:, list(ml_train_df.columns[2:12])].to_numpy().T
+            y_val_flatten_channel = val_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_test_flatten_channel = test_df.loc[:, list(ml_df.columns[2:12])].to_numpy().T
-            y_test_flatten_channel = test_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_test_flatten_channel = test_df.loc[:, list(ml_train_df.columns[2:12])].to_numpy().T
+            y_test_flatten_channel = test_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
 
         else:
             # Split data into train and validation only IF SPLIT = FALSE
-            train_df, val_df = train_test_split(ml_df, random_state=42, train_size=0.8, shuffle=True)
+            train_df, val_df = train_test_split(ml_train_df, random_state=42, train_size=0.8, shuffle=True)
 
-            # Read json file to find out all parameter path
-            with open(self.parameter_path_test, "r") as para_path_test:
-                para_path = json.load(para_path_test)
-
-            # Collect data from paths
-            para_collection = dataCollection(
-                para_path['general_folder'],
-                para_path['geometry_domain_list'],
-                para_path['path_elev'],
-                para_path['path_wd'],
-                para_path['path_wse'],
-                para_path['path_proportion'],
-                para_path['path_manning'],
-                para_path['roughness'],
-                para_path['path_sd']
+            # Get test collection
+            test_collection = dataCollection(
+                self.para_path['test']['general_folder'],
+                self.para_path['test']['geometry_domain_list'],
+                self.para_path['test']['path_elev'],
+                self.para_path['test']['path_wd'],
+                self.para_path['test']['path_wse'],
+                self.para_path['test']['path_proportion'],
+                self.para_path['test']['path_manning'],
+                self.para_path['test']['path_roughness'],
+                self.para_path['test']['path_sd']
             )
 
             # Get dataframe for machine learning
-            test_df = para_collection.loadpara_into_dataframe_regression_proportion()
+            test_df = test_collection.loadpara_into_dataframe_regression_proportion(name_csv='test')
 
             # Write out just incase
-            train_df.to_csv(fr"{para_path['general_folder']}\train_df_regression_proportion.csv", index=False)
-            val_df.to_csv(fr"{para_path['general_folder']}\val_df_regression_proportion.csv", index=False)
-            test_df.to_csv(fr"{para_path['general_folder']}\test_df_regression_proportion.csv", index=False)
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_regression_proportion.csv", index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_regression_proportion.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['test']['general_folder']}\test_df_regression_proportion.csv",
+                           index=False)
 
             # Flatten data
-            x_train_flatten_channel = train_df.loc[:, list(ml_df.columns[2:12])].to_numpy().T
-            y_train_flatten_channel = train_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:12])].to_numpy().T
+            y_train_flatten_channel = train_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_val_flatten_channel = val_df.loc[:, list(ml_df.columns[2:12])].to_numpy().T
-            y_val_flatten_channel = val_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_val_flatten_channel = val_df.loc[:, list(ml_train_df.columns[2:12])].to_numpy().T
+            y_val_flatten_channel = val_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
             x_test_flatten_channel = test_df.loc[:, list(test_df.columns[2:12])].to_numpy().T
             y_test_flatten_channel = test_df.loc[:, test_df.columns[-1]].to_numpy().T
@@ -535,9 +475,11 @@ class dataPreparation:
             x_training_001 = x_train_flatten_channel.transpose().copy()
             y_training_001 = y_train_flatten_channel.copy()
             # Get resampled relevance
-            relevance_middle_001 = resreg.sigmoid_relevance(y_training_001,
-                                                        cl=para_path['resample_proportion']['cl_001'],
-                                                        ch=para_path['resample_proportion']['ch_001']) # 1 is 100% flood, 99 is not 100% flood
+            relevance_middle_001 = resreg.sigmoid_relevance(
+                y_training_001,
+                cl=self.para_path['train']['resample_proportion']['cl_001'],
+                ch=self.para_path['train']['resample_proportion']['ch_001']
+            ) # 1 is 100% flood, 99 is not 100% flood
 
             # Plot two-sided relevance values (left and right tails)
             plt.scatter(y_training_001, relevance_middle_001, s=.1)
@@ -548,18 +490,18 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{para_path['general_folder']}\relevance_proportion_first_level.jpg",
+                fr"{self.para_path['train']['general_folder']}\relevance_proportion_first_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
             # Do resampling to create new x and y - first time
             x_train_flatten_channel_resampled_001, y_train_flatten_channel_resampled_001 = self.wercs_oversample(
                 x_training_001, y_training_001, relevance_middle_001,
-                over=para_path['resample_proportion']['over_001'],
-                random_state=para_path['resample_proportion']['random_state_001'],
-                filters_num=para_path['resample_proportion']['filters_num_001'],
-                filters_value=para_path['resample_proportion']['filters_value_001'],
-                filters=para_path['resample_proportion']['filters_001']
+                over=self.para_path['train']['resample_proportion']['over_001'],
+                random_state=self.para_path['train']['resample_proportion']['random_state_001'],
+                filters_num=self.para_path['train']['resample_proportion']['filters_num_001'],
+                filters_value=self.para_path['train']['resample_proportion']['filters_value_001'],
+                filters=self.para_path['train']['resample_proportion']['filters_001']
             )
 
             # Ref: https://stackoverflow.com/questions/176918/how-to-find-the-index-for-a-given-item-in-a-list
@@ -572,7 +514,7 @@ class dataPreparation:
             plt.hist(y_train_flatten_channel_resampled_NO_0_001, bins=100)
             # Save fig
             plt.savefig(
-                fr"{para_path['general_folder']}\resample_proportion_first_level.jpg",
+                fr"{self.para_path['train']['general_folder']}\resample_proportion_first_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -580,9 +522,11 @@ class dataPreparation:
             # SECOND LEVEL -------------
             x_training_002 = x_train_flatten_channel_resampled_NO_0_001.copy()
             y_training_002 = y_train_flatten_channel_resampled_NO_0_001.copy()
-            relevance_middle_002 = resreg.sigmoid_relevance(y_training_002,
-                                                            cl=para_path['resample_proportion']['cl_002'],
-                                                            ch=para_path['resample_proportion']['ch_002'])
+            relevance_middle_002 = resreg.sigmoid_relevance(
+                y_training_002,
+                cl=self.para_path['train']['resample_proportion']['cl_002'],
+                ch=self.para_path['train']['resample_proportion']['ch_002']
+            )
 
             # Plot two-sided relevance values (left and right tails)
             plt.scatter(y_training_002, relevance_middle_002, s=.1)
@@ -594,7 +538,7 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{para_path['general_folder']}\relevance_proportion_second_level.jpg",
+                fr"{self.para_path['train']['general_folder']}\relevance_proportion_second_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -603,18 +547,18 @@ class dataPreparation:
                 x_training_002,
                 y_training_002,
                 relevance_middle_002,
-                over=para_path['resample_proportion']['over_002'],
-                random_state=para_path['resample_proportion']['random_state_002'],
-                filters_num=para_path['resample_proportion']['filters_num_002'],
-                filters_value=para_path['resample_proportion']['filters_value_002'],
-                filters=para_path['resample_proportion']['filters_002']
+                over=self.para_path['train']['resample_proportion']['over_002'],
+                random_state=self.para_path['train']['resample_proportion']['random_state_002'],
+                filters_num=self.para_path['train']['resample_proportion']['filters_num_002'],
+                filters_value=self.para_path['train']['resample_proportion']['filters_value_002'],
+                filters=self.para_path['train']['resample_proportion']['filters_002']
             )
 
             # Plot
             plt.hist(y_train_flatten_channel_resampled_002, bins=100)
             # Save fig
             plt.savefig(
-                fr"{para_path['general_folder']}\resample_proportion_second_level.jpg",
+                fr"{self.para_path['train']['general_folder']}\resample_proportion_second_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -635,7 +579,7 @@ class dataPreparation:
             plt.hist(y_train_flatten_channel_full, bins=100)
             # Save fig
             plt.savefig(
-                fr"{para_path['general_folder']}\resample_proportion_full.jpg",
+                fr"{self.para_path['train']['general_folder']}\resample_proportion_full.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -733,83 +677,76 @@ class dataPreparation:
 
     def split_data_regression_sd(self, resample=False):
 
-        # Read json file to find out all parameter path
-        with open(self.parameter_path_train, "r") as para_path_train:
-            para_path = json.load(para_path_train)
-
-        # Collect data from paths
-        para_collection = dataCollection(
-            para_path['general_folder'],
-            para_path['geometry_domain_list'],
-            para_path['path_elev'],
-            para_path['path_wd'],
-            para_path['path_wse'],
-            para_path['path_proportion'],
-            para_path['path_manning'],
-            para_path['path_roughness'],
-            para_path['path_sd']
+        # Get train collection
+        train_collection = dataCollection(
+            self.para_path['train']['general_folder'],
+            self.para_path['train']['geometry_domain_list'],
+            self.para_path['train']['path_elev'],
+            self.para_path['train']['path_wd'],
+            self.para_path['train']['path_wse'],
+            self.para_path['train']['path_proportion'],
+            self.para_path['train']['path_manning'],
+            self.para_path['train']['path_roughness'],
+            self.para_path['train']['path_sd']
         )
 
         # Get dataframe for machine learning
-
-        ml_df = para_collection.loadpara_into_dataframe_regression_sd()
+        ml_train_df = train_collection.loadpara_into_dataframe_regression_sd()
 
         if self.split == True:
+
             # Split data into train, validation, and test IF SPLIT = TRUE
-            train_val_df, test_df = train_test_split(ml_df, random_state=42, train_size=0.8, shuffle=True)
+            train_val_df, test_df = train_test_split(ml_train_df, random_state=42, train_size=0.8, shuffle=True)
             train_df, val_df = train_test_split(train_val_df, random_state=42, train_size=0.75, shuffle=True)
 
             # Write out just incase
-            train_df.to_csv(fr"{para_path['general_folder']}\train_df_regression_sd.csv", index=False)
-            val_df.to_csv(fr"{para_path['general_folder']}\val_df_regression_sd.csv", index=False)
-            test_df.to_csv(fr"{para_path['general_folder']}\test_df_regression_sd.csv", index=False)
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_regression_sd.csv",
+                            index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_regression_sd.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['train']['general_folder']}\test_df_regression_sd.csv", index=False)
 
             # Flatten data
-            x_train_flatten_channel = train_df.loc[:, list(ml_df.columns[2:10])].to_numpy().T
-            y_train_flatten_channel = train_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:10])].to_numpy().T
+            y_train_flatten_channel = train_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_val_flatten_channel = val_df.loc[:, list(ml_df.columns[2:10])].to_numpy().T
-            y_val_flatten_channel = val_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_val_flatten_channel = val_df.loc[:, list(ml_train_df.columns[2:10])].to_numpy().T
+            y_val_flatten_channel = val_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_test_flatten_channel = test_df.loc[:, list(ml_df.columns[2:10])].to_numpy().T
-            y_test_flatten_channel = test_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_test_flatten_channel = test_df.loc[:, list(ml_train_df.columns[2:10])].to_numpy().T
+            y_test_flatten_channel = test_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
 
         else:
             # Split data into train and validation only IF SPLIT = FALSE
-            train_df, val_df = train_test_split(ml_df, random_state=42, train_size=0.8, shuffle=True)
+            train_df, val_df = train_test_split(ml_train_df, random_state=42, train_size=0.8, shuffle=True)
 
-            # Read json file to find out all parameter path
-            with open(self.parameter_path_test, "r") as para_path_test:
-                para_path = json.load(para_path_test)
-
-            # Collect data from paths
-            para_collection = dataCollection(
-                para_path['general_folder'],
-                para_path['geometry_domain_list'],
-                para_path['path_elev'],
-                para_path['path_wd'],
-                para_path['path_wse'],
-                para_path['path_proportion'],
-                para_path['path_manning'],
-                para_path['roughness'],
-                para_path['path_sd']
+            # Get test collection
+            test_collection = dataCollection(
+                self.para_path['test']['general_folder'],
+                self.para_path['test']['geometry_domain_list'],
+                self.para_path['test']['path_elev'],
+                self.para_path['test']['path_wd'],
+                self.para_path['test']['path_wse'],
+                self.para_path['test']['path_proportion'],
+                self.para_path['test']['path_manning'],
+                self.para_path['test']['path_roughness'],
+                self.para_path['test']['path_sd']
             )
 
             # Get dataframe for machine learning
-            test_df = para_collection.loadpara_into_dataframe_regression_proportion()
+            test_df = test_collection.loadpara_into_dataframe_regression_sd(name_csv='test')
 
             # Write out just incase
-            train_df.to_csv(fr"{para_path['general_folder']}\train_df_regression_sd.csv", index=False)
-            val_df.to_csv(fr"{para_path['general_folder']}\val_df_regression_sd.csv", index=False)
-            test_df.to_csv(fr"{para_path['general_folder']}\test_df_regression_sd.csv", index=False)
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_regression_sd.csv", index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_regression_sd.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['test']['general_folder']}\test_df_regression_sd.csv", index=False)
 
             # Flatten data
-            x_train_flatten_channel = train_df.loc[:, list(ml_df.columns[2:10])].to_numpy().T
-            y_train_flatten_channel = train_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:10])].to_numpy().T
+            y_train_flatten_channel = train_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_val_flatten_channel = val_df.loc[:, list(ml_df.columns[2:10])].to_numpy().T
-            y_val_flatten_channel = val_df.loc[:, ml_df.columns[-1]].to_numpy().T
+            x_val_flatten_channel = val_df.loc[:, list(ml_train_df.columns[2:10])].to_numpy().T
+            y_val_flatten_channel = val_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
             x_test_flatten_channel = test_df.loc[:, list(test_df.columns[2:10])].to_numpy().T
             y_test_flatten_channel = test_df.loc[:, test_df.columns[-1]].to_numpy().T
@@ -822,9 +759,10 @@ class dataPreparation:
             x_training = x_train_flatten_channel.transpose().copy()
             y_training = y_train_flatten_channel.copy()
             # Get resampled relevance
-            relevance_middle = resreg.sigmoid_relevance(y_training,
-                                                        cl=para_path['resample_sd']['cl'],
-                                                        ch=para_path['resample_sd']['ch'])
+            relevance_middle = resreg.sigmoid_relevance(
+                y_training,
+                cl=self.para_path['train']['resample_sd']['cl'],
+                ch=self.para_path['train']['resample_sd']['ch'])
 
             # Plot two-sided relevance values (left and right tails)
             plt.scatter(y_training, relevance_middle, s=.1)
@@ -835,7 +773,7 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{para_path['general_folder']}\relevance_sd_level.jpg",
+                fr"{self.para_path['train']['general_folder']}\relevance_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -844,7 +782,7 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{para_path['general_folder']}\distribution_full_sd_level.jpg",
+                fr"{self.para_path['train']['general_folder']}\distribution_full_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -853,17 +791,17 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{para_path['general_folder']}\distribution_no0_sd_level.jpg",
+                fr"{self.para_path['train']['general_folder']}\distribution_no0_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
             # Do resampling to create new x and y - first time
             x_train_flatten_channel_resampled, y_train_flatten_channel_resampled = resreg.wercs(
                 x_training, y_training, relevance_middle,
-                over=para_path['resample_sd']['over'],
-                under=para_path['resample_sd']['under'],
-                noise=para_path['resample_sd']['noise'],
-                random_state=para_path['resample_sd']['random_state']
+                over=self.para_path['train']['resample_sd']['over'],
+                under=self.para_path['train']['resample_sd']['under'],
+                noise=self.para_path['train']['resample_sd']['noise'],
+                random_state=self.para_path['train']['resample_sd']['random_state']
             )
 
             x_train_flatten_channel_R = x_train_flatten_channel_resampled.T.copy()
@@ -874,7 +812,7 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{para_path['general_folder']}\distribution_afterresampling_sd_level.jpg",
+                fr"{self.para_path['train']['general_folder']}\distribution_afterresampling_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
