@@ -770,7 +770,7 @@ class runBayesRegressionSD():
                   f'Validation Loss: {val_loss_total:.3f}')
 
 
-    def retrain_model(self, pretrained_model_path, epoch_range):
+    def retrain_model(self, pretrained_model_path, epoch_new):
 
         min_val_loss = np.Inf
 
@@ -782,7 +782,7 @@ class runBayesRegressionSD():
         retrain_model_optimizer = torch.optim.Adam(retrain_model.parameters(), lr=self.lr)
         retrain_model_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
-        for epoch in range(epoch_range[0], epoch_range[1], 1):
+        for epoch in range(checkpoint['epoch']+1, epoch_new, 1):
             # Train
             train_loss_total = 0
             retrain_model.train()
