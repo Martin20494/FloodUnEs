@@ -44,7 +44,7 @@ class runBayesClassification():
     def __init__(self,
                  parameter_path,
                  setseed=2,
-                 number_layers=9,
+                 number_layers=10,
                  lr=1e-4,
                  batchsize=16*16,
                  num_workers=1
