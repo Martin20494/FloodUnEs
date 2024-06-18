@@ -224,7 +224,7 @@ class runBayesClassification():
                 torch.save(train_model, fr"{self.train_folder}\full_model.pth")
 
             # Print results
-            if class1_acc < class1_acc_final:
+            if class1_acc > class1_acc_final:
                 print('\nMAYBE accuracy increased: {:.2f} -> {:.2f}%\n'
                       ''.format(class1_acc_final, class1_acc))
                 class1_acc_final = class1_acc
@@ -358,7 +358,7 @@ class runBayesClassification():
                 torch.save(retrain_model, fr"{self.train_folder}\full_model.pth")
 
             # Print results
-            if class1_acc < class1_acc_final:
+            if class1_acc > class1_acc_final:
                 print('\nMAYBE accuracy increased: {:.2f} -> {:.2f}%\n'
                       ''.format(class1_acc_final, class1_acc))
                 class1_acc_final = class1_acc
