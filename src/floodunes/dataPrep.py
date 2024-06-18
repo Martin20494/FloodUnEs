@@ -135,12 +135,14 @@ class pixelDatasetGeneration():
         return datasets
 
 
-    def weight_and_sampler(self):
+    def weight_and_sampler(self, coef):
 
         # FOR WEIGHT -------------------
         # Ref: https://saturncloud.io/blog/how-to-use-class-weights-with-focal-loss-in-pytorch-for-imbalanced-multiclass-classification/
         # Class analysis ---------------
         # Get y_train
+        if coef is None:
+            coef = [1.2, 5, 1.7]
         y_train = self.pixel_dataset_generation()[1].astype('int64')
 
         # Count classes
@@ -158,9 +160,9 @@ class pixelDatasetGeneration():
 
         # Class weight new
         class_weights_new = torch.Tensor([
-            class_weights[0]*1.2,
-            class_weights[1]*5,
-            class_weights[2]*1.7
+            class_weights[0]*coef[0],
+            class_weights[1]*coef[1],
+            class_weights[2]*coef[2]
         ])
 
 
@@ -311,7 +313,7 @@ class dataPreparation:
         return train_pixel_dataset, val_pixel_dataset, test_pixel_dataset
 
 
-    def pixel_dataloader_classification(self, batchsize=16*16, num_workers=1):
+    def pixel_dataloader_classification(self, coef, batchsize=16*16, num_workers=1):
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         kwargs = {'num_workers': num_workers, 'pin_memory': True} if device == 'cuda' else {}
@@ -324,7 +326,7 @@ class dataPreparation:
         trainloader = DataLoader(
             dataset=Pixel(train_pixel_dataset.pixel_dataset_generation()),
             batch_size=batchsize,
-            sampler=train_pixel_dataset.weight_and_sampler()[1],
+            sampler=train_pixel_dataset.weight_and_sampler(coef=coef)[1],
             **kwargs
         )
 
@@ -346,7 +348,7 @@ class dataPreparation:
             **kwargs
         )
 
-        return trainloader, valloader, testloader, train_pixel_dataset.weight_and_sampler()[0]
+        return trainloader, valloader, testloader, train_pixel_dataset.weight_and_sampler(coef=coef)[0]
 
 
 

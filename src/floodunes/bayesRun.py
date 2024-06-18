@@ -43,6 +43,7 @@ class runBayesClassification():
 
     def __init__(self,
                  parameter_path,
+                 coef, # for waikanae [1.2, 5, 1.7]
                  setseed=2,
                  number_layers=9,
                  lr=1e-4,
@@ -86,7 +87,7 @@ class runBayesClassification():
 
         # Set data loaders
         trainloader, valloader, testloader, class_weight_new = data_preparation.pixel_dataloader_classification(
-            batchsize=batchsize, num_workers=num_workers
+            coef, batchsize=batchsize, num_workers=num_workers
         )
         self.trainloader = trainloader
         self.valloader = valloader
