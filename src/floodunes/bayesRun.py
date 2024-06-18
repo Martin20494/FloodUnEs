@@ -44,7 +44,7 @@ class runBayesClassification():
     def __init__(self,
                  parameter_path,
                  setseed=2,
-                 number_layers=10,
+                 number_layers=9,
                  lr=1e-4,
                  batchsize=16*16,
                  num_workers=1
@@ -114,7 +114,6 @@ class runBayesClassification():
         train_model_criterion = nn.CrossEntropyLoss(reduction='sum')
 
         class1_acc_final = 0
-        min_val_loss = np.Inf
         set_seed(self.setseed)
 
         for epoch in range(total_epochs):
@@ -225,7 +224,7 @@ class runBayesClassification():
                 torch.save(train_model, fr"{self.train_folder}\full_model.pth")
 
             # Print results
-            if class1_acc > class1_acc_final:
+            if class1_acc < class1_acc_final:
                 print('\nMAYBE accuracy increased: {:.2f} -> {:.2f}%\n'
                       ''.format(class1_acc_final, class1_acc))
                 class1_acc_final = class1_acc
@@ -359,7 +358,7 @@ class runBayesClassification():
                 torch.save(retrain_model, fr"{self.train_folder}\full_model.pth")
 
             # Print results
-            if class1_acc > class1_acc_final:
+            if class1_acc < class1_acc_final:
                 print('\nMAYBE accuracy increased: {:.2f} -> {:.2f}%\n'
                       ''.format(class1_acc_final, class1_acc))
                 class1_acc_final = class1_acc
