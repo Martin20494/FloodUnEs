@@ -8,6 +8,7 @@ import numpy as np
 
 # Sklearn packages
 from sklearn.metrics import confusion_matrix
+from sklearn.metrics import precision_recall_fscore_support as score
 
 # Random package
 import random
@@ -16,6 +17,21 @@ import random
 import os
 import json
 from pathlib import Path
+
+# For raster
+import rioxarray as rxr
+import xarray as xr
+import rasterio as rio
+
+# For dataframe
+import pandas as pd
+
+# Result file package
+import csv
+
+# For drawing plot
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Other packages
 from .bayesFuncClassification import BayesianNetwork, minibatch_weight
@@ -77,7 +93,7 @@ class runBayesClassification():
 
         else:
             # Create test based on train
-            Path(fr"{self.para_path['train']['general_folder']}\model_classification_proportion").mkdir(
+            Path(fr"{self.para_path['train']['general_folder']}\model_classification_proportion\prediction").mkdir(
                                                                                                     parents=True,
                                                                                                     exist_ok=True)
             self.test_folder = fr"{self.para_path['train']['general_folder']}\model_classification_proportion"
@@ -238,6 +254,12 @@ class runBayesClassification():
                   f'MaybeAcc: {class1_acc:.2f}% |'
                   f'YesAcc: {class2_acc:.2f}%\n')
 
+            _results = [epoch, train_loss_total, val_loss_total, accuracy, class0_acc, class1_acc, class2_acc]
+
+            with open(fr"{self.train_folder}\result_classification.csv", "a", newline="") as f_out:
+                writer = csv.writer(f_out, delimiter=',')
+                writer.writerow(_results)
+
 
     def retrain_model(self, pretrained_model_path, epoch_new):
 
@@ -372,6 +394,12 @@ class runBayesClassification():
                   f'MaybeAcc: {class1_acc:.2f}% |'
                   f'YesAcc: {class2_acc:.2f}%\n')
 
+            _results = [epoch, train_loss_total, val_loss_total, accuracy, class0_acc, class1_acc, class2_acc]
+
+            with open(fr"{self.train_folder}\result_classification.csv", "a", newline="") as f_out:
+                writer = csv.writer(f_out, delimiter=',')
+                writer.writerow(_results)
+
 
     def test_model(self, trained_model_path):
 
@@ -406,7 +434,71 @@ class runBayesClassification():
         test_list_np = [each_tensor.cpu().detach().numpy() for each_tensor in test_list]
         test_list_np_flatten = np.concatenate(test_list_np).ravel()
 
-        return predict_list_np_flatten, test_list_np_flatten
+        # Read out original raster
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['test']['general_folder']}\dem_input_domain.nc")
+
+        # Write out file
+        prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
+        prediction_raster = xr.DataArray(
+            data=prediction_values[0],
+            dims=['y', 'x'],
+            coords={
+                'x': (['x'], ex_raster.x.values),
+                'y': (['y'], ex_raster.y.values[::-1])
+            },
+            attrs=ex_raster.attrs
+        )
+        prediction_raster.rio.write_crs("epsg:2193", inplace=True)
+        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.to_raster(fr"{self.test_folder}\prediction\proportion_prediction.nc", dtype=np.int32)
+
+        # Write out different file
+        different_values = predict_list_np_flatten - test_list_np_flatten
+        different_raster = xr.DataArray(
+            data=prediction_values[0],
+            dims=['y', 'x'],
+            coords={
+                'x': (['x'], ex_raster.x.values),
+                'y': (['y'], ex_raster.y.values[::-1])
+            },
+            attrs=ex_raster.attrs
+        )
+        different_raster.rio.write_crs("epsg:2193", inplace=True)
+        different_raster.rio.write_nodata(-9999)
+        different_raster.rio.to_raster(fr"{self.test_folder}\prediction\different_proportion_prediction.nc",
+                                       dtype=np.int32)
+
+
+        # Produce confusion matrix
+        cfm = confusion_matrix(
+            test_list_np_flatten, predict_list_np_flatten,
+        )
+        cfm_pc = np.stack([(cfm[i, :]/np.sum(cfm[i, :])) for i in range(3)])
+        df_cfm_pc = pd.DataFrame(
+            cfm_pc,
+            index=[i for i in ['NO flood', 'MAYBE flood', 'YES flood']],
+            columns=['NO flood', 'MAYBE flood', 'YES flood']
+        )
+        group_counts = ['{0:0.0f}'.format(value) for value in cfm.flatten()]
+        calculate_percentages = np.concatenate([(cfm[i, :]/np.sum(cfm[i, :])) for i in range(3)])
+        group_percentages = ['{0:.2%}'.format(value) for value in calculate_percentages]
+        labels = [f'{v2}\n{v3}' for v2, v3 in zip(group_counts, group_percentages)]
+        labels = np.asarray(labels).reshape(3, 3)
+
+        # Draw confusion matrix
+        fig, ax = plt.subplots(figsize=(10, 7))
+
+        sns.heatmap(df_cfm_pc, annot=labels, cmap='rainbow', ax=ax, fmt='', cbar=False)
+        ax.set_xlabel('PREDICTED LABEL')
+        ax.set_ylabel('ACTUAL LABEL')
+
+        # Calculate other metrics
+        precision, recall, fscore, support = score(test_list_np_flatten, predict_list_np_flatten)
+
+        print('precision: {}'.format(precision))
+        print('recall: {}'.format(recall))
+        print('fscore: {}'.format(fscore))
+        print('support: {}'.format(support))
 
 
 
@@ -449,7 +541,7 @@ class runBayesRegressionProportion():
 
         else:
             # Create test based on train
-            Path(fr"{self.para_path['train']['general_folder']}\model_regression_proportion").mkdir(
+            Path(fr"{self.para_path['train']['general_folder']}\model_regression_proportion\prediction").mkdir(
                 parents=True,
                 exist_ok=True)
             self.test_folder = fr"{self.para_path['train']['general_folder']}\model_regression_proportion"
@@ -535,11 +627,16 @@ class runBayesRegressionProportion():
                     }, fr"{self.train_folder}\trained_model_{epoch}.pt")
                     torch.save(train_model, fr"{self.train_folder}\full_model.pth")
 
-            _results = [epoch, train_loss_total, val_loss_total]
-
             print(f'Epoch: {epoch:03} | '
                   f'Train Loss: {train_loss_total:.3f} |'
-                  f'Validation Loss: {val_loss_total:.3f}')
+                  f'Validation Loss: {val_loss_total:.3f\n}')
+
+            _results = [epoch, train_loss_total, val_loss_total]
+
+            with open(fr"{self.train_folder}\result_regression_proportion.csv", "a", newline="") as f_out:
+                writer = csv.writer(f_out, delimiter=',')
+                writer.writerow(_results)
+
 
     def retrain_model(self, pretrained_model_path, epoch_new):
 
@@ -599,17 +696,22 @@ class runBayesRegressionProportion():
                     }, fr"{self.train_folder}\trained_model_{epoch}.pt")
                     torch.save(retrain_model, fr"{self.train_folder}\full_model.pth")
 
-            _results = [epoch, train_loss_total, val_loss_total]
-
             print(f'Epoch: {epoch:03} | '
                   f'Train Loss: {train_loss_total:.3f} |'
-                  f'Validation Loss: {val_loss_total:.3f}')
+                  f'Validation Loss: {val_loss_total:.3f}\n')
+
+            _results = [epoch, train_loss_total, val_loss_total]
+
+            with open(fr"{self.train_folder}\result_regression_proportion.csv", "a", newline="") as f_out:
+                writer = csv.writer(f_out, delimiter=',')
+                writer.writerow(_results)
+
+
 
     def test_model(self, trained_model_path):
 
         predict_list = []
         test_list = []
-        sd_list = []
 
         checkpoint = torch.load(fr"{trained_model_path}")
         test_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
@@ -629,14 +731,34 @@ class runBayesRegressionProportion():
             output_T = np.array(outputs_lst).T
             output_mean = output_T.mean(axis=1)
 
-            # Calculate std
-            output_sd = output_T.std(axis=1)
-
             test_list.append(test_ydata)
             predict_list.append(output_mean)
-            sd_list.append(output_sd)
 
-        return predict_list, test_list, sd_list
+
+        # Read out original raster
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['test']['general_folder']}\dem_input_domain.nc")
+
+        # Get predicted values
+        predict_list_np_flatten = np.concatenate(predict_list).ravel()
+        predict_list_np_flatten[predict_list_np_flatten < 0] = 0
+        predict_list_np_flatten[predict_list_np_flatten > 100] = 0
+        prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
+
+        # Write out file
+        prediction_raster = xr.DataArray(
+            data=prediction_values[0],
+            dims=['y', 'x'],
+            coords={
+                'x': (['x'], ex_raster.x.values),
+                'y': (['y'], ex_raster.y.values[::-1])
+            },
+            attrs=ex_raster.attrs
+        )
+        prediction_raster.rio.write_crs("epsg:2193", inplace=True)
+        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.to_raster(fr"{self.test_folder}\prediction\proportion_prediction.nc", dtype=np.int32)
+
+        return predict_list, test_list
 
 
 
@@ -679,9 +801,10 @@ class runBayesRegressionSD():
 
         else:
             # Create test based on train
-            Path(fr"{self.para_path['train']['general_folder']}\model_regression_sd").mkdir(
+            Path(fr"{self.para_path['train']['general_folder']}\model_regression_sd\prediction").mkdir(
                 parents=True,
                 exist_ok=True)
+
             self.test_folder = fr"{self.para_path['train']['general_folder']}\model_regression_sd"
 
             # Call data
@@ -763,11 +886,15 @@ class runBayesRegressionSD():
                     }, fr"{self.train_folder}\trained_model_{epoch}.pt")
                     torch.save(train_model, fr"{self.train_folder}\full_model.pth")
 
-            _results = [epoch, train_loss_total, val_loss_total]
-
             print(f'Epoch: {epoch:03} | '
                   f'Train Loss: {train_loss_total:.3f} |'
-                  f'Validation Loss: {val_loss_total:.3f}')
+                  f'Validation Loss: {val_loss_total:.3f}\n')
+
+            _results = [epoch, train_loss_total, val_loss_total]
+
+            with open(fr"{self.train_folder}\result_regression_sd.csv", "a", newline="") as f_out:
+                writer = csv.writer(f_out, delimiter=',')
+                writer.writerow(_results)
 
 
     def retrain_model(self, pretrained_model_path, epoch_new):
@@ -828,11 +955,16 @@ class runBayesRegressionSD():
                     }, fr"{self.train_folder}\trained_model_{epoch}.pt")
                     torch.save(retrain_model, fr"{self.train_folder}\full_model.pth")
 
-            _results = [epoch, train_loss_total, val_loss_total]
-
             print(f'Epoch: {epoch:03} | '
                   f'Train Loss: {train_loss_total:.3f} |'
-                  f'Validation Loss: {val_loss_total:.3f}')
+                  f'Validation Loss: {val_loss_total:.3f}\n')
+
+            _results = [epoch, train_loss_total, val_loss_total]
+
+            with open(fr"{self.train_folder}\result_regression_sd.csv", "a", newline="") as f_out:
+                writer = csv.writer(f_out, delimiter=',')
+                writer.writerow(_results)
+
 
     def test_model(self, trained_model_path):
 
@@ -864,4 +996,24 @@ class runBayesRegressionSD():
             predict_list.append(output_mean)
             sd_list.append(output_sd)
 
-        return predict_list, test_list, sd_list
+        # Read out original raster
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['test']['general_folder']}\dem_input_domain.nc")
+
+        # Get predicted values
+        predict_list_np_flatten = np.concatenate(predict_list).ravel() / 100
+        predict_list_np_flatten[predict_list_np_flatten < 0.01] = 0
+        prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
+
+        # Write out file
+        prediction_raster = xr.DataArray(
+            data=prediction_values[0],
+            dims=['y', 'x'],
+            coords={
+                'x': (['x'], ex_raster.x.values),
+                'y': (['y'], ex_raster.y.values[::-1])
+            },
+            attrs=ex_raster.attrs
+        )
+        prediction_raster.rio.write_crs("epsg:2193", inplace=True)
+        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.to_raster(fr"{self.test_folder}\prediction\sd_prediction.nc", dtype=np.int32)
