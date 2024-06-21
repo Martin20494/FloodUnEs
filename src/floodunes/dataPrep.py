@@ -1,6 +1,6 @@
 # Pytorch packages
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from torch.utils.data import WeightedRandomSampler
 
 # Visualisation packages

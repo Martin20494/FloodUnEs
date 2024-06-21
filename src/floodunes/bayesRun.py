@@ -21,7 +21,6 @@ from pathlib import Path
 # For raster
 import rioxarray as rxr
 import xarray as xr
-import rasterio as rio
 
 # For dataframe
 import pandas as pd
