@@ -36,6 +36,7 @@ import seaborn as sns
 from .bayesFuncClassification import BayesianNetwork, minibatch_weight
 from .bayesFuncRegression import MLP_BBB
 from .dataPrep import dataPreparation
+from .dataPrepEstimate import dataPreparationEstimate
 
 torch.set_default_dtype(torch.float64)
 
@@ -51,7 +52,7 @@ def set_seed(seed: int = 42) -> None:
     torch.backends.cudnn.benchmark = False
     # Set a fixed value for the hash seed
     os.environ["PYTHONHASHSEED"] = str(seed)
-
+    
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 class runBayesClassification():
@@ -75,16 +76,16 @@ class runBayesClassification():
         # Call out file of paths to get general path
         # Train, val, and perhaps test
         # Train
-        Path(fr"{self.para_path['train']['general_folder']}/model_classification_proportion").mkdir(
-                                                                                                        parents=True,
-                                                                                                        exist_ok=True)
+        Path(
+            fr"{self.para_path['train']['general_folder']}/model_classification_proportion"
+        ).mkdir(parents=True, exist_ok=True)
         self.train_folder = fr"{self.para_path['train']['general_folder']}/model_classification_proportion"
 
         if self.para_path['test'] != None:
             # Test
-            Path(fr"{self.para_path['test']['general_folder']}/model_classification_proportion").mkdir(
-                                                                                                 parents=True,
-                                                                                                 exist_ok=True)
+            Path(
+                fr"{self.para_path['test']['general_folder']}/model_classification_proportion"
+            ).mkdir(parents=True, exist_ok=True)
             self.test_folder = fr"{self.para_path['test']['general_folder']}/model_classification_proportion"
 
             # Call data
@@ -92,9 +93,9 @@ class runBayesClassification():
 
         else:
             # Create test based on train
-            Path(fr"{self.para_path['train']['general_folder']}/model_classification_proportion/prediction").mkdir(
-                                                                                                    parents=True,
-                                                                                                    exist_ok=True)
+            Path(
+                fr"{self.para_path['train']['general_folder']}/model_classification_proportion/prediction"
+            ).mkdir(parents=True, exist_ok=True)
             self.test_folder = fr"{self.para_path['train']['general_folder']}/model_classification_proportion"
 
             # Call data
@@ -102,22 +103,12 @@ class runBayesClassification():
 
         # Set data loaders
         trainloader, valloader, testloader, class_weight_new = data_preparation.pixel_dataloader_classification(
-            coef, batchsize=batchsize, num_workers=num_workers
+            coef, batchsize=batchsize, num_workers=num_workers,
         )
         self.trainloader = trainloader
         self.valloader = valloader
         self.testloader = testloader
         self.class_weight_new = class_weight_new
-
-        # For test only if parameter_path_test = None
-        # Call out trainloader, valoader, testloader
-
-        # Set up parameters for your machine
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.device = device
-        kwargs = {'num_workers': num_workers, 'pin_memory': True} if self.device == 'cuda' else {}
-        self.kwargs = kwargs
-
 
         # Set up layers and model
         self.number_layers = number_layers
@@ -125,12 +116,22 @@ class runBayesClassification():
 
     def train_model(self, total_epochs):
 
+        # Get setseed
+        set_seed(self.setseed)
+
+        # Get model data
         train_model = BayesianNetwork(self.number_layers*1*1, 3, self.number_layers).to(device)
         train_model_optimizer = torch.optim.Adam(train_model.parameters(), self.lr)
         train_model_criterion = nn.CrossEntropyLoss(reduction='sum')
 
+        # Get initial class MAYBE accuracy
         class1_acc_final = 0
-        set_seed(self.setseed)
+
+        # Prepare result file
+        with open(fr"{self.train_folder}/result_classification.csv", 'w+', newline='') as f_out:
+            writer = csv.writer(f_out, delimiter=',')
+            writer.writerow(['epoch', 'train_loss_total', 'val_loss_total',
+                             'Overall_acc', 'No_acc', 'MAYBE_acc', 'YES_acc'])
 
         for epoch in range(total_epochs):
 
@@ -262,9 +263,10 @@ class runBayesClassification():
 
     def retrain_model(self, pretrained_model_path, epoch_new):
 
-
+        # Get setseed
         set_seed(self.setseed)
 
+        # Get model data
         checkpoint = torch.load(fr"{pretrained_model_path}")
         retrain_model = BayesianNetwork(self.number_layers * 1 * 1, 3, self.number_layers).to(device)
         retrain_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
@@ -272,7 +274,14 @@ class runBayesClassification():
         retrain_model_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         retrain_model_criterion = nn.CrossEntropyLoss(reduction='sum')
 
+        # Get initial accuracy of class MAYBE
         class1_acc_final = checkpoint['class1_acc']
+
+        # Prepare result file
+        with open(fr"{self.train_folder}/result_classification.csv", 'w+', newline='') as f_out:
+            writer = csv.writer(f_out, delimiter=',')
+            writer.writerow(['epoch', 'train_loss_total', 'val_loss_total',
+                             'Overall_acc', 'No_acc', 'MAYBE_acc', 'YES_acc'])
 
         for epoch in range(checkpoint['epoch']+1, epoch_new, 1):
 
@@ -402,14 +411,18 @@ class runBayesClassification():
 
     def test_model(self, trained_model_path):
 
+        # Get empty predict and test lists
         predict_list = []
         test_list = []
-        total = 0
-        correct = 0
 
+        # Get model data
         checkpoint = torch.load(fr"{trained_model_path}")
         test_model = BayesianNetwork(self.number_layers * 1 * 1, 3, self.number_layers).to(device)
         test_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+
+        # Get initial total and correct
+        total = 0
+        correct = 0
 
         test_model.eval()
         for test_batchidx, (test_data, test_labels) in enumerate(self.testloader):
@@ -449,7 +462,10 @@ class runBayesClassification():
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(-9999)
-        prediction_raster.rio.to_raster(fr"{self.test_folder}/prediction/proportion_prediction.nc", dtype=np.int32)
+        prediction_raster.rio.to_raster(
+            fr"{self.test_folder}/prediction/classification_proportion_prediction.nc", 
+            dtype=np.int32
+        )
 
         # Write out different file
         different_values = predict_list_np_flatten - test_list_np_flatten
@@ -464,8 +480,10 @@ class runBayesClassification():
         )
         different_raster.rio.write_crs("epsg:2193", inplace=True)
         different_raster.rio.write_nodata(-9999)
-        different_raster.rio.to_raster(fr"{self.test_folder}/prediction/different_proportion_prediction.nc",
-                                       dtype=np.int32)
+        different_raster.rio.to_raster(
+            fr"{self.test_folder}/prediction/different_classification_proportion_prediction.nc",
+            dtype=np.int32
+        )
 
 
         # Produce confusion matrix
@@ -556,28 +574,21 @@ class runBayesRegressionProportion():
         self.valloader = valloader
         self.testloader = testloader
 
-        # For test only if parameter_path_test = None
-        # Call out trainloader, valoader, testloader
-
-        # Set up parameters for your machine
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.device = device
-        kwargs = {'num_workers': num_workers, 'pin_memory': True} if self.device == 'cuda' else {}
-        self.kwargs = kwargs
-
-
         # Set up layers and model
         self.number_layers = number_layers
         self.lr = lr
 
     def train_model(self, total_epochs):
 
-        min_val_loss = np.Inf
-
+        # Get setseed
         set_seed(self.setseed)
 
+        # Get model data
         train_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
         train_model_optimizer = torch.optim.Adam(train_model.parameters(), lr=self.lr)
+
+        # Set initial validation loss
+        min_val_loss = np.Inf
 
         for epoch in range(total_epochs):
             # Train
@@ -639,15 +650,19 @@ class runBayesRegressionProportion():
 
     def retrain_model(self, pretrained_model_path, epoch_new):
 
-        min_val_loss = np.Inf
 
+        # Get setseed
         set_seed(self.setseed)
 
+        # Get model data
         checkpoint = torch.load(fr"{pretrained_model_path}")
         retrain_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
         retrain_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
         retrain_model_optimizer = torch.optim.Adam(retrain_model.parameters(), lr=self.lr)
         retrain_model_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
+        # Set initial validation loss
+        min_val_loss = np.Inf
 
         for epoch in range(checkpoint['epoch'] + 1, epoch_new, 1):
             # Train
@@ -709,9 +724,11 @@ class runBayesRegressionProportion():
 
     def test_model(self, trained_model_path):
 
+        # Get empty predict and test lists
         predict_list = []
         test_list = []
 
+        # Get model data
         checkpoint = torch.load(fr"{trained_model_path}")
         test_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
         test_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
@@ -755,7 +772,10 @@ class runBayesRegressionProportion():
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(-9999)
-        prediction_raster.rio.to_raster(fr"{self.test_folder}/prediction/proportion_prediction.nc", dtype=np.int32)
+        prediction_raster.rio.to_raster(
+            fr"{self.test_folder}/prediction/regression_proportion_prediction.nc", 
+            dtype=np.int32
+        )
 
         return predict_list, test_list
 
@@ -783,16 +803,16 @@ class runBayesRegressionSD():
         # Call out file of paths to get general path
         # Train, val, and perhaps test
         # Train
-        Path(fr"{self.para_path['train']['general_folder']}/model_regression_sd").mkdir(
-            parents=True,
-            exist_ok=True)
+        Path(
+            fr"{self.para_path['train']['general_folder']}/model_regression_sd"
+        ).mkdir(parents=True, exist_ok=True)
         self.train_folder = fr"{self.para_path['train']['general_folder']}/model_regression_sd"
 
         if self.para_path['test'] != None:
             # Test
-            Path(fr"{self.para_path['test']['general_folder']}/model_regression_sd").mkdir(
-                parents=True,
-                exist_ok=True)
+            Path(
+                fr"{self.para_path['test']['general_folder']}/model_regression_sd"
+            ).mkdir(parents=True, exist_ok=True)
             self.test_folder = fr"{self.para_path['test']['general_folder']}/model_regression_sd"
 
             # Call data
@@ -800,10 +820,9 @@ class runBayesRegressionSD():
 
         else:
             # Create test based on train
-            Path(fr"{self.para_path['train']['general_folder']}/model_regression_sd/prediction").mkdir(
-                parents=True,
-                exist_ok=True)
-
+            Path(
+                fr"{self.para_path['train']['general_folder']}/model_regression_sd/prediction"
+            ).mkdir(parents=True, exist_ok=True)
             self.test_folder = fr"{self.para_path['train']['general_folder']}/model_regression_sd"
 
             # Call data
@@ -817,26 +836,21 @@ class runBayesRegressionSD():
         self.valloader = valloader
         self.testloader = testloader
 
-        # For test only if parameter_path_test = None
-        # Call out trainloader, valoader, testloader
-
-        # Set up parameters for your machine
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.device = device
-        kwargs = {'num_workers': num_workers, 'pin_memory': True} if self.device == 'cuda' else {}
-        self.kwargs = kwargs
-
         # Set up layers and model
         self.number_layers = number_layers
         self.lr = lr
 
+
     def train_model(self, total_epochs):
 
+        # Get setseed
         set_seed(self.setseed)
 
+        # Get model data
         train_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
         train_model_optimizer = torch.optim.Adam(train_model.parameters(), lr=self.lr)
 
+        # Set initial validation loss
         min_val_loss = np.Inf
 
         for epoch in range(total_epochs):
@@ -898,15 +912,18 @@ class runBayesRegressionSD():
 
     def retrain_model(self, pretrained_model_path, epoch_new):
 
-        min_val_loss = np.Inf
-
+        # Set seed
         set_seed(self.setseed)
 
+        # Get model data
         checkpoint = torch.load(fr"{pretrained_model_path}")
         retrain_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
         retrain_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
         retrain_model_optimizer = torch.optim.Adam(retrain_model.parameters(), lr=self.lr)
         retrain_model_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+
+        # Set initial validation loss
+        min_val_loss = np.Inf
 
         for epoch in range(checkpoint['epoch']+1, epoch_new, 1):
             # Train
@@ -965,12 +982,14 @@ class runBayesRegressionSD():
                 writer.writerow(_results)
 
 
+
     def test_model(self, trained_model_path):
 
+        # Get empty predict and test lists
         predict_list = []
         test_list = []
-        sd_list = []
 
+        # Get model data
         checkpoint = torch.load(fr"{trained_model_path}")
         test_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
         test_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
@@ -988,12 +1007,9 @@ class runBayesRegressionSD():
             output_T = np.array(outputs_lst).T
             output_mean = output_T.mean(axis=1)
 
-            # Calculate std
-            output_sd = output_T.std(axis=1)
-
+            # Collect outputs
             test_list.append(test_ydata)
             predict_list.append(output_mean)
-            sd_list.append(output_sd)
 
         # Read out original raster
         ex_raster = rxr.open_rasterio(fr"{self.para_path['test']['general_folder']}/dem_input_domain.nc")
@@ -1015,4 +1031,199 @@ class runBayesRegressionSD():
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(-9999)
-        prediction_raster.rio.to_raster(fr"{self.test_folder}/prediction/sd_prediction.nc", dtype=np.int32)
+        prediction_raster.rio.to_raster(
+            fr"{self.test_folder}/prediction/sd_regression_prediction.nc",
+            dtype=np.int32
+        )
+
+
+
+
+
+class runEstimation():
+
+    def __init__(self,
+                 parameter_path,
+                 batchsize=2048,
+                 setseed=2,
+                 num_workers=1
+                 ):
+
+        # Set up set seed
+        self.setseed = setseed
+
+        # Set up parameters for getting data
+        with open(parameter_path, 'r') as para_path_r:
+            self.para_path = json.load(para_path_r)
+
+        # Estimate path
+        Path(
+            fr"{self.para_path['estimate']['general_folder']}/estimate_results"
+        ).mkdir(parents=True, exist_ok=True)
+        self.estimate_folder = fr"{self.para_path['estimate']['general_folder']}/estimate_results"
+
+        # Call data
+        data_preparation = dataPreparationEstimate(self.para_path, setseed=self.setseed)
+
+        # Set data loaders
+        estimateloader = data_preparation.pixel_dataloader_estimate(
+            type=type, batchsize=batchsize, num_workers=num_workers
+        )
+        self.estimateloader = estimateloader
+
+
+    def estimate_proportion_classification_model(self,
+                                                 model_path,
+                                                 number_layers=9
+                                                 ):
+        # Get empty estimate list
+        estimate_list = []
+
+        # Get model data
+        checkpoint = torch.load(fr"{model_path}")
+        estimate_model = BayesianNetwork(number_layers * 1 * 1, 3, number_layers).to(device)
+        estimate_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        estimate_model.eval()
+
+        # Estimate
+        for estimate_data in self.estimateloader:
+            estimate_data = estimate_data.to(device)
+            outputs = estimate_model(estimate_data)
+
+            probabilities = F.softmax(outputs)
+            _, estimated = torch.max(probabilities.data, 1)
+
+            estimate_list.append(estimated)
+
+        # Pull data out and put them into numpy
+        estimate_list_np = [each_tensor.cpu().detach().numpy() for each_tensor in estimate_list]
+        estimate_list_np_flatten = np.concatenate(estimate_list_np).ravel()
+
+        # Read out original raster
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['estimate']['general_folder']}/dem_input_domain.nc")
+
+        # Write out file
+        estimate_values = estimate_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
+        estimate_raster = xr.DataArray(
+            data=estimate_values[0],
+            dims=['y', 'x'],
+            coords={
+                'x': (['x'], ex_raster.x.values),
+                'y': (['y'], ex_raster.y.values[::-1])
+            },
+            attrs=ex_raster.attrs
+        )
+        estimate_raster.rio.write_crs("epsg:2193", inplace=True)
+        estimate_raster.rio.write_nodata(-9999)
+        estimate_raster.rio.to_raster(fr"{self.estimate_folder}/classification_proportion_results.nc", dtype=np.int32)
+
+
+    def estimate_proportion_regression_model(self,
+                                             model_path,
+                                             number_layers=10
+                                             ):
+
+        # Get empty estimate list
+        estimate_list = []
+
+        # Get model data
+        checkpoint = torch.load(fr"{model_path}")
+        estimate_model = MLP_BBB(number_layers, setseed=self.setseed).to(device)
+        estimate_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        estimate_model.eval()
+
+        for estimate_xdata in self.estimateloader:
+
+            estimate_xdata = estimate_xdata.to(device)
+
+            # Get outputs
+            set_seed(self.setseed)
+            outputs_lst = [estimate_model.forward(estimate_xdata).data.cpu().numpy().squeeze(1) for _ in range(100)]
+
+            # Calculate mean
+            output_T = np.array(outputs_lst).T
+            output_mean = output_T.mean(axis=1)
+
+            # Collect outputs
+            estimate_list.append(output_mean)
+
+
+        # Read out original raster
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['estimate']['general_folder']}/dem_input_domain.nc")
+
+        # Get predicted values
+        estimate_list_np_flatten = np.concatenate(estimate_list).ravel()
+        estimate_list_np_flatten[estimate_list_np_flatten < 0] = 0
+        estimate_list_np_flatten[estimate_list_np_flatten > 100] = 0
+        estimate_values = estimate_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
+
+        # Write out file
+        estimate_raster = xr.DataArray(
+            data=estimate_values[0],
+            dims=['y', 'x'],
+            coords={
+                'x': (['x'], ex_raster.x.values),
+                'y': (['y'], ex_raster.y.values[::-1])
+            },
+            attrs=ex_raster.attrs
+        )
+        estimate_raster.rio.write_crs("epsg:2193", inplace=True)
+        estimate_raster.rio.write_nodata(-9999)
+        estimate_raster.rio.to_raster(
+            fr"{self.estimate_folder}/regression_proportion_results.nc",
+            dtype=np.int32
+        )
+
+    def estimate_sd_regression_model(self,
+                                     model_path,
+                                     number_layers=8
+                                     ):
+
+        # Get empty estimate list
+        estimate_list = []
+
+        # Get model data
+        checkpoint = torch.load(fr"{model_path}")
+        estimate_model = MLP_BBB(number_layers, setseed=self.setseed).to(device)
+        estimate_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        estimate_model.eval()
+
+        for estimate_xdata in self.estimateloader:
+
+            estimate_xdata = estimate_xdata.to(device)
+
+            # Get outputs
+            set_seed(self.setseed)
+            outputs_lst = [estimate_model.forward(estimate_xdata).data.cpu().numpy().squeeze(1) for _ in range(100)]
+
+            # Calculate mean
+            output_T = np.array(outputs_lst).T
+            output_mean = output_T.mean(axis=1)
+
+            # Collect outputs
+            estimate_list.append(output_mean)
+
+        # Read out original raster
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['estimate']['general_folder']}/dem_input_domain.nc")
+
+        # Get estimated values
+        estimate_list_np_flatten = np.concatenate(estimate_list).ravel() / 100
+        estimate_list_np_flatten[estimate_list_np_flatten < 0.01] = 0
+        estimate_values = estimate_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
+
+        # Write out file
+        estimate_raster = xr.DataArray(
+            data=estimate_values[0],
+            dims=['y', 'x'],
+            coords={
+                'x': (['x'], ex_raster.x.values),
+                'y': (['y'], ex_raster.y.values[::-1])
+            },
+            attrs=ex_raster.attrs
+        )
+        estimate_raster.rio.write_crs("epsg:2193", inplace=True)
+        estimate_raster.rio.write_nodata(-9999)
+        estimate_raster.rio.to_raster(
+            fr"{self.estimate_folder}/regression_sd_results.nc",
+            dtype=np.int32
+        )

@@ -188,20 +188,14 @@ class pixelDatasetGeneration():
 
 class Pixel():
 
-    def __init__(self, xy, transform=None):
+    def __init__(self, xy):
         # data loading
         self.x = torch.Tensor(xy[0])
         self.y = torch.Tensor(xy[1])
         self.n_samples = xy[0].shape[0]
-        self.transform = transform
 
     def __getitem__(self, index):
-        sample = self.x[index], self.y[index]
-
-        if self.transform:
-            sample = self.transform(sample)
-
-        return sample
+        return self.x[index], self.y[index]
 
     def __len__(self):
         return self.n_samples
@@ -294,7 +288,7 @@ class dataPreparation:
             y_test_flatten_channel = test_df.loc[:, test_df.columns[-1]].to_numpy().T
 
 
-        # Create lists to return
+        # Get pixels values across simulations
         train_pixel_dataset = pixelDatasetGeneration(
             x_train_flatten_channel, y_train_flatten_channel,
             setseed=self.setseed
@@ -588,7 +582,7 @@ class dataPreparation:
             x_train_flatten_channel_R = x_train_flatten_channel_full.T.copy()
             y_train_flatten_channel_R = y_train_flatten_channel_full.copy()
 
-            # Create lists to return
+            # Get pixels values across simulations
             train_pixel_dataset = pixelDatasetGeneration(
                 x_train_flatten_channel_R, y_train_flatten_channel_R,
                 setseed=self.setseed
@@ -610,7 +604,7 @@ class dataPreparation:
         else:
 
 
-            # Create lists to return
+            # Get pixels values across simulations
             train_pixel_dataset = pixelDatasetGeneration(
                 x_train_flatten_channel, y_train_flatten_channel,
                 setseed=self.setseed
@@ -818,7 +812,7 @@ class dataPreparation:
                 bbox_inches='tight', dpi=600
             )
 
-            # Create lists to return
+            # Get pixels values across simulations
             train_pixel_dataset = pixelDatasetGeneration(
                 x_train_flatten_channel_R, y_train_flatten_channel_R,
                 setseed=self.setseed
@@ -840,7 +834,7 @@ class dataPreparation:
         else:
 
 
-            # Create lists to return
+            # Get pixels values across simulations
             train_pixel_dataset = pixelDatasetGeneration(
                 x_train_flatten_channel, y_train_flatten_channel,
                 setseed=self.setseed
@@ -900,10 +894,3 @@ class dataPreparation:
         )
 
         return trainloader, valloader, testloader
-
-
-
-
-
-
-
