@@ -94,7 +94,7 @@ class runBayesClassification():
         else:
             # Create test based on train
             Path(
-                fr"{self.para_path['train']['general_folder']}/model_classification_proportion/prediction"
+                fr"{self.para_path['train']['general_folder']}/model_classification_proportion"
             ).mkdir(parents=True, exist_ok=True)
             self.test_folder = fr"{self.para_path['train']['general_folder']}/model_classification_proportion"
 
@@ -457,6 +457,10 @@ class runBayesClassification():
         # Read out original raster
         ex_raster = rxr.open_rasterio(fr"{self.para_path['test']['general_folder']}/dem_input_domain.nc")
 
+        # Create folder to write file
+        Path(
+            fr"{self.test_folder}/prediction"
+        ).mkdir(parents=True, exist_ok=True)
         # Write out file
         prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
         prediction_raster = xr.DataArray(
@@ -565,7 +569,7 @@ class runBayesRegressionProportion():
 
         else:
             # Create test based on train
-            Path(fr"{self.para_path['train']['general_folder']}/model_regression_proportion/prediction").mkdir(
+            Path(fr"{self.para_path['train']['general_folder']}/model_regression_proportion").mkdir(
                 parents=True,
                 exist_ok=True)
             self.test_folder = fr"{self.para_path['train']['general_folder']}/model_regression_proportion"
@@ -777,6 +781,10 @@ class runBayesRegressionProportion():
         predict_list_np_flatten[predict_list_np_flatten > 100] = 0
         prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
 
+        # Create folder to write out file
+        Path(
+            fr"{self.test_folder}/prediction"
+        ).mkdir(parents=True, exist_ok=True)
         # Write out file
         prediction_raster = xr.DataArray(
             data=prediction_values[0],
@@ -1045,6 +1053,10 @@ class runBayesRegressionSD():
         predict_list_np_flatten[predict_list_np_flatten < 0.01] = 0
         prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
 
+        # Create folder to write out file
+        Path(
+            fr"{self.test_folder}/prediction"
+        ).mkdir(parents=True, exist_ok=True)
         # Write out file
         prediction_raster = xr.DataArray(
             data=prediction_values[0],
