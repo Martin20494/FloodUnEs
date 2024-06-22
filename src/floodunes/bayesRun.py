@@ -655,7 +655,7 @@ class runBayesRegressionProportion():
 
             print(f'Epoch: {epoch:03} | '
                   f'Train Loss: {train_loss_total:.3f} |'
-                  f'Validation Loss: {val_loss_total:.3f\n}')
+                  f'Validation Loss: {val_loss_total:.3f}\n')
 
             _results = [epoch, train_loss_total, val_loss_total]
 
