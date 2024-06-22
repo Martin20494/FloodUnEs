@@ -110,6 +110,8 @@ class runBayesClassification():
         self.testloader = testloader
         self.class_weight_new = class_weight_new
 
+        print(self.class_weight_new)
+
         # Set up layers and model
         self.number_layers = number_layers
         self.lr = lr
@@ -467,10 +469,11 @@ class runBayesClassification():
             attrs=ex_raster.attrs
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
-        # prediction_raster.rio.write_nodata(-9999)
-        # prediction_raster.rio.to_raster(
-        #     fr"{self.test_folder}/prediction/classification_proportion_prediction.nc"
-        # )
+        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.to_raster(
+            fr"{self.test_folder}/prediction/classification_proportion_prediction.nc",
+            dtype=np.float64
+        )
 
         # Write out different file
         different_values = predict_list_np_flatten - test_list_np_flatten
@@ -485,9 +488,10 @@ class runBayesClassification():
         )
         different_raster.rio.write_crs("epsg:2193", inplace=True)
         different_raster.rio.write_nodata(-9999)
-        # different_raster.rio.to_raster(
-        #     fr"{self.test_folder}/prediction/different_classification_proportion_prediction.nc"
-        # )
+        different_raster.rio.to_raster(
+            fr"{self.test_folder}/prediction/different_classification_proportion_prediction.nc",
+            dtype=np.float64
+        )
 
 
         # Produce confusion matrix
@@ -789,7 +793,8 @@ class runBayesRegressionProportion():
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(-9999)
         prediction_raster.rio.to_raster(
-            fr"{self.test_folder}/prediction/regression_proportion_prediction.nc"
+            fr"{self.test_folder}/prediction/regression_proportion_prediction.nc",
+            dtype=np.float64
         )
 
         return predict_list, test_list
@@ -1056,7 +1061,8 @@ class runBayesRegressionSD():
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(-9999)
         prediction_raster.rio.to_raster(
-            fr"{self.test_folder}/prediction/sd_regression_prediction.nc"
+            fr"{self.test_folder}/prediction/sd_regression_prediction.nc",
+            dtype=np.float64
         )
 
 
@@ -1246,5 +1252,6 @@ class runEstimation():
         estimate_raster.rio.write_crs("epsg:2193", inplace=True)
         estimate_raster.rio.write_nodata(-9999)
         estimate_raster.rio.to_raster(
-            fr"{self.estimate_folder}/regression_sd_results.nc"
+            fr"{self.estimate_folder}/regression_sd_results.nc",
+            dtype=np.float64
         )

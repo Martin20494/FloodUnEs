@@ -315,12 +315,15 @@ class dataPreparation:
         # Call train, validation, and test pixel dataset
         train_pixel_dataset, val_pixel_dataset, test_pixel_dataset = self.split_data_classification()
 
+        # Sampler
+        sampler = train_pixel_dataset.weight_and_sampler(coef=coef)
+
         set_seed(self.setseed)
         # FOR TRAIN -----------------------------------
         trainloader = DataLoader(
             dataset=Pixel(train_pixel_dataset.pixel_dataset_generation()),
             batch_size=batchsize,
-            sampler=train_pixel_dataset.weight_and_sampler(coef=coef)[1],
+            sampler=sampler[1],
             **kwargs
         )
 
@@ -342,7 +345,7 @@ class dataPreparation:
             **kwargs
         )
 
-        return trainloader, valloader, testloader, train_pixel_dataset.weight_and_sampler(coef=coef)[0]
+        return trainloader, valloader, testloader, sampler[0]
 
 
 

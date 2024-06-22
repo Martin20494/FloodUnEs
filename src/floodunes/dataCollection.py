@@ -58,6 +58,7 @@ class dataCollection:
         dem.rio.write_crs(2193, inplace=True)
         dem_domain = dem.z.rio.clip(self.geometry_domain)
         dem_domain.rio.write_nodata(-9999)
+        dem_domain.attrs['_FillValue'] = -9999
         dem_domain.rio.to_raster(fr"{self.general_folder}/dem_input_domain.nc")
         self.dem_domain = dem_domain
 
@@ -691,7 +692,11 @@ class dataCollection:
         # Write out
         canny_edge_arr.rio.write_crs(2193)
         canny_edge_arr.rio.write_nodata(-9999)
-        canny_edge_arr.rio.to_raster(fr"{self.general_folder}/cannyedge_input_domain.nc")
+        canny_edge_arr.attrs['_FillValue'] = -9999
+        canny_edge_arr.rio.to_raster(
+            fr"{self.general_folder}/cannyedge_input_domain.nc", dtype=np.float64
+        )
+
 
         return canny_edge_arr.values.flatten()
 
