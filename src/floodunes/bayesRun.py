@@ -75,27 +75,27 @@ class runBayesClassification():
         # Call out file of paths to get general path
         # Train, val, and perhaps test
         # Train
-        Path(fr"{self.para_path['train']['general_folder']}\model_classification_proportion").mkdir(
+        Path(fr"{self.para_path['train']['general_folder']}/model_classification_proportion").mkdir(
                                                                                                         parents=True,
                                                                                                         exist_ok=True)
-        self.train_folder = fr"{self.para_path['train']['general_folder']}\model_classification_proportion"
+        self.train_folder = fr"{self.para_path['train']['general_folder']}/model_classification_proportion"
 
         if self.para_path['test'] != None:
             # Test
-            Path(fr"{self.para_path['test']['general_folder']}\model_classification_proportion").mkdir(
+            Path(fr"{self.para_path['test']['general_folder']}/model_classification_proportion").mkdir(
                                                                                                  parents=True,
                                                                                                  exist_ok=True)
-            self.test_folder = fr"{self.para_path['test']['general_folder']}\model_classification_proportion"
+            self.test_folder = fr"{self.para_path['test']['general_folder']}/model_classification_proportion"
 
             # Call data
             data_preparation = dataPreparation(self.para_path, False, setseed=self.setseed)
 
         else:
             # Create test based on train
-            Path(fr"{self.para_path['train']['general_folder']}\model_classification_proportion\prediction").mkdir(
+            Path(fr"{self.para_path['train']['general_folder']}/model_classification_proportion/prediction").mkdir(
                                                                                                     parents=True,
                                                                                                     exist_ok=True)
-            self.test_folder = fr"{self.para_path['train']['general_folder']}\model_classification_proportion"
+            self.test_folder = fr"{self.para_path['train']['general_folder']}/model_classification_proportion"
 
             # Call data
             data_preparation = dataPreparation(self.para_path, True, setseed=self.setseed)
@@ -236,12 +236,12 @@ class runBayesClassification():
                     'class1_acc': class1_acc,
                     'optimizer_state_dict': train_model_optimizer.state_dict(),
                     'model_state_dict': train_model.state_dict()
-                }, fr"{self.train_folder}\trained_model_{epoch}.pt")
-                torch.save(train_model, fr"{self.train_folder}\full_model.pth")
+                }, fr"{self.train_folder}/trained_model_{epoch}.pt")
+                torch.save(train_model, fr"{self.train_folder}/full_model.pth")
 
             # Print results
             if class1_acc > class1_acc_final:
-                print('\nMAYBE accuracy increased: {:.2f} -> {:.2f}%\n'
+                print('/nMAYBE accuracy increased: {:.2f} -> {:.2f}%\n'
                       ''.format(class1_acc_final, class1_acc))
                 class1_acc_final = class1_acc
 
@@ -255,7 +255,7 @@ class runBayesClassification():
 
             _results = [epoch, train_loss_total, val_loss_total, accuracy, class0_acc, class1_acc, class2_acc]
 
-            with open(fr"{self.train_folder}\result_classification.csv", "a", newline="") as f_out:
+            with open(fr"{self.train_folder}/result_classification.csv", "a", newline="") as f_out:
                 writer = csv.writer(f_out, delimiter=',')
                 writer.writerow(_results)
 
@@ -376,8 +376,8 @@ class runBayesClassification():
                     'val_loss_total': val_loss_total,
                     'optimizer_state_dict': retrain_model_optimizer.state_dict(),
                     'model_state_dict': retrain_model.state_dict()
-                }, fr"{self.train_folder}\trained_model_{epoch}.pt")
-                torch.save(retrain_model, fr"{self.train_folder}\full_model.pth")
+                }, fr"{self.train_folder}/trained_model_{epoch}.pt")
+                torch.save(retrain_model, fr"{self.train_folder}/full_model.pth")
 
             # Print results
             if class1_acc > class1_acc_final:
@@ -395,7 +395,7 @@ class runBayesClassification():
 
             _results = [epoch, train_loss_total, val_loss_total, accuracy, class0_acc, class1_acc, class2_acc]
 
-            with open(fr"{self.train_folder}\result_classification.csv", "a", newline="") as f_out:
+            with open(fr"{self.train_folder}/result_classification.csv", "a", newline="") as f_out:
                 writer = csv.writer(f_out, delimiter=',')
                 writer.writerow(_results)
 
@@ -434,7 +434,7 @@ class runBayesClassification():
         test_list_np_flatten = np.concatenate(test_list_np).ravel()
 
         # Read out original raster
-        ex_raster = rxr.open_rasterio(fr"{self.para_path['test']['general_folder']}\dem_input_domain.nc")
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['test']['general_folder']}/dem_input_domain.nc")
 
         # Write out file
         prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
@@ -449,7 +449,7 @@ class runBayesClassification():
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(-9999)
-        prediction_raster.rio.to_raster(fr"{self.test_folder}\prediction\proportion_prediction.nc", dtype=np.int32)
+        prediction_raster.rio.to_raster(fr"{self.test_folder}/prediction/proportion_prediction.nc", dtype=np.int32)
 
         # Write out different file
         different_values = predict_list_np_flatten - test_list_np_flatten
@@ -464,7 +464,7 @@ class runBayesClassification():
         )
         different_raster.rio.write_crs("epsg:2193", inplace=True)
         different_raster.rio.write_nodata(-9999)
-        different_raster.rio.to_raster(fr"{self.test_folder}\prediction\different_proportion_prediction.nc",
+        different_raster.rio.to_raster(fr"{self.test_folder}/prediction/different_proportion_prediction.nc",
                                        dtype=np.int32)
 
 
@@ -523,27 +523,27 @@ class runBayesRegressionProportion():
         # Call out file of paths to get general path
         # Train, val, and perhaps test
         # Train
-        Path(fr"{self.para_path['train']['general_folder']}\model_regression_proportion").mkdir(
+        Path(fr"{self.para_path['train']['general_folder']}/model_regression_proportion").mkdir(
             parents=True,
             exist_ok=True)
-        self.train_folder = fr"{self.para_path['train']['general_folder']}\model_regression_proportion"
+        self.train_folder = fr"{self.para_path['train']['general_folder']}/model_regression_proportion"
 
         if self.para_path['test'] != None:
             # Test
-            Path(fr"{self.para_path['test']['general_folder']}\model_regression_proportion").mkdir(
+            Path(fr"{self.para_path['test']['general_folder']}/model_regression_proportion").mkdir(
                 parents=True,
                 exist_ok=True)
-            self.test_folder = fr"{self.para_path['test']['general_folder']}\model_regression_proportion"
+            self.test_folder = fr"{self.para_path['test']['general_folder']}/model_regression_proportion"
 
             # Call data
             data_preparation = dataPreparation(self.para_path, False, setseed=self.setseed)
 
         else:
             # Create test based on train
-            Path(fr"{self.para_path['train']['general_folder']}\model_regression_proportion\prediction").mkdir(
+            Path(fr"{self.para_path['train']['general_folder']}/model_regression_proportion/prediction").mkdir(
                 parents=True,
                 exist_ok=True)
-            self.test_folder = fr"{self.para_path['train']['general_folder']}\model_regression_proportion"
+            self.test_folder = fr"{self.para_path['train']['general_folder']}/model_regression_proportion"
 
             # Call data
             data_preparation = dataPreparation(self.para_path, True, setseed=self.setseed)
@@ -623,8 +623,8 @@ class runBayesRegressionProportion():
                         'val_loss_total': val_loss_total,
                         'optimizer_state_dict': train_model_optimizer.state_dict(),
                         'model_state_dict': train_model.state_dict()
-                    }, fr"{self.train_folder}\trained_model_{epoch}.pt")
-                    torch.save(train_model, fr"{self.train_folder}\full_model.pth")
+                    }, fr"{self.train_folder}/trained_model_{epoch}.pt")
+                    torch.save(train_model, fr"{self.train_folder}/full_model.pth")
 
             print(f'Epoch: {epoch:03} | '
                   f'Train Loss: {train_loss_total:.3f} |'
@@ -632,7 +632,7 @@ class runBayesRegressionProportion():
 
             _results = [epoch, train_loss_total, val_loss_total]
 
-            with open(fr"{self.train_folder}\result_regression_proportion.csv", "a", newline="") as f_out:
+            with open(fr"{self.train_folder}/result_regression_proportion.csv", "a", newline="") as f_out:
                 writer = csv.writer(f_out, delimiter=',')
                 writer.writerow(_results)
 
@@ -692,8 +692,8 @@ class runBayesRegressionProportion():
                         'val_loss_total': val_loss_total,
                         'optimizer_state_dict': retrain_model_optimizer.state_dict(),
                         'model_state_dict': retrain_model.state_dict()
-                    }, fr"{self.train_folder}\trained_model_{epoch}.pt")
-                    torch.save(retrain_model, fr"{self.train_folder}\full_model.pth")
+                    }, fr"{self.train_folder}/trained_model_{epoch}.pt")
+                    torch.save(retrain_model, fr"{self.train_folder}/full_model.pth")
 
             print(f'Epoch: {epoch:03} | '
                   f'Train Loss: {train_loss_total:.3f} |'
@@ -701,7 +701,7 @@ class runBayesRegressionProportion():
 
             _results = [epoch, train_loss_total, val_loss_total]
 
-            with open(fr"{self.train_folder}\result_regression_proportion.csv", "a", newline="") as f_out:
+            with open(fr"{self.train_folder}/result_regression_proportion.csv", "a", newline="") as f_out:
                 writer = csv.writer(f_out, delimiter=',')
                 writer.writerow(_results)
 
@@ -735,7 +735,7 @@ class runBayesRegressionProportion():
 
 
         # Read out original raster
-        ex_raster = rxr.open_rasterio(fr"{self.para_path['test']['general_folder']}\dem_input_domain.nc")
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['test']['general_folder']}/dem_input_domain.nc")
 
         # Get predicted values
         predict_list_np_flatten = np.concatenate(predict_list).ravel()
@@ -755,7 +755,7 @@ class runBayesRegressionProportion():
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(-9999)
-        prediction_raster.rio.to_raster(fr"{self.test_folder}\prediction\proportion_prediction.nc", dtype=np.int32)
+        prediction_raster.rio.to_raster(fr"{self.test_folder}/prediction/proportion_prediction.nc", dtype=np.int32)
 
         return predict_list, test_list
 
@@ -783,28 +783,28 @@ class runBayesRegressionSD():
         # Call out file of paths to get general path
         # Train, val, and perhaps test
         # Train
-        Path(fr"{self.para_path['train']['general_folder']}\model_regression_sd").mkdir(
+        Path(fr"{self.para_path['train']['general_folder']}/model_regression_sd").mkdir(
             parents=True,
             exist_ok=True)
-        self.train_folder = fr"{self.para_path['train']['general_folder']}\model_regression_sd"
+        self.train_folder = fr"{self.para_path['train']['general_folder']}/model_regression_sd"
 
         if self.para_path['test'] != None:
             # Test
-            Path(fr"{self.para_path['test']['general_folder']}\model_regression_sd").mkdir(
+            Path(fr"{self.para_path['test']['general_folder']}/model_regression_sd").mkdir(
                 parents=True,
                 exist_ok=True)
-            self.test_folder = fr"{self.para_path['test']['general_folder']}\model_regression_sd"
+            self.test_folder = fr"{self.para_path['test']['general_folder']}/model_regression_sd"
 
             # Call data
             data_preparation = dataPreparation(self.para_path, False, setseed=self.setseed)
 
         else:
             # Create test based on train
-            Path(fr"{self.para_path['train']['general_folder']}\model_regression_sd\prediction").mkdir(
+            Path(fr"{self.para_path['train']['general_folder']}/model_regression_sd/prediction").mkdir(
                 parents=True,
                 exist_ok=True)
 
-            self.test_folder = fr"{self.para_path['train']['general_folder']}\model_regression_sd"
+            self.test_folder = fr"{self.para_path['train']['general_folder']}/model_regression_sd"
 
             # Call data
             data_preparation = dataPreparation(self.para_path, True, setseed=self.setseed)
@@ -882,8 +882,8 @@ class runBayesRegressionSD():
                         'val_loss_total': val_loss_total,
                         'optimizer_state_dict': train_model_optimizer.state_dict(),
                         'model_state_dict': train_model.state_dict()
-                    }, fr"{self.train_folder}\trained_model_{epoch}.pt")
-                    torch.save(train_model, fr"{self.train_folder}\full_model.pth")
+                    }, fr"{self.train_folder}/trained_model_{epoch}.pt")
+                    torch.save(train_model, fr"{self.train_folder}/full_model.pth")
 
             print(f'Epoch: {epoch:03} | '
                   f'Train Loss: {train_loss_total:.3f} |'
@@ -891,7 +891,7 @@ class runBayesRegressionSD():
 
             _results = [epoch, train_loss_total, val_loss_total]
 
-            with open(fr"{self.train_folder}\result_regression_sd.csv", "a", newline="") as f_out:
+            with open(fr"{self.train_folder}/result_regression_sd.csv", "a", newline="") as f_out:
                 writer = csv.writer(f_out, delimiter=',')
                 writer.writerow(_results)
 
@@ -951,8 +951,8 @@ class runBayesRegressionSD():
                         'val_loss_total': val_loss_total,
                         'optimizer_state_dict': retrain_model_optimizer.state_dict(),
                         'model_state_dict': retrain_model.state_dict()
-                    }, fr"{self.train_folder}\trained_model_{epoch}.pt")
-                    torch.save(retrain_model, fr"{self.train_folder}\full_model.pth")
+                    }, fr"{self.train_folder}/trained_model_{epoch}.pt")
+                    torch.save(retrain_model, fr"{self.train_folder}/full_model.pth")
 
             print(f'Epoch: {epoch:03} | '
                   f'Train Loss: {train_loss_total:.3f} |'
@@ -960,7 +960,7 @@ class runBayesRegressionSD():
 
             _results = [epoch, train_loss_total, val_loss_total]
 
-            with open(fr"{self.train_folder}\result_regression_sd.csv", "a", newline="") as f_out:
+            with open(fr"{self.train_folder}/result_regression_sd.csv", "a", newline="") as f_out:
                 writer = csv.writer(f_out, delimiter=',')
                 writer.writerow(_results)
 
@@ -996,7 +996,7 @@ class runBayesRegressionSD():
             sd_list.append(output_sd)
 
         # Read out original raster
-        ex_raster = rxr.open_rasterio(fr"{self.para_path['test']['general_folder']}\dem_input_domain.nc")
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['test']['general_folder']}/dem_input_domain.nc")
 
         # Get predicted values
         predict_list_np_flatten = np.concatenate(predict_list).ravel() / 100
@@ -1015,4 +1015,4 @@ class runBayesRegressionSD():
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(-9999)
-        prediction_raster.rio.to_raster(fr"{self.test_folder}\prediction\sd_prediction.nc", dtype=np.int32)
+        prediction_raster.rio.to_raster(fr"{self.test_folder}/prediction/sd_prediction.nc", dtype=np.int32)

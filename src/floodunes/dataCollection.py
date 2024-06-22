@@ -58,7 +58,7 @@ class dataCollection:
         dem.rio.write_crs(2193, inplace=True)
         dem_domain = dem.z.rio.clip(self.geometry_domain)
         dem_domain.rio.write_nodata(-9999)
-        dem_domain.rio.to_raster(fr"{self.general_folder}\dem_input_domain.nc")
+        dem_domain.rio.to_raster(fr"{self.general_folder}/dem_input_domain.nc")
         self.dem_domain = dem_domain
 
         # Water depth
@@ -68,7 +68,7 @@ class dataCollection:
         wd.rio.write_crs(2193, inplace=True)
         wd_domain = wd.rio.clip(self.geometry_domain)
         wd_domain.rio.write_nodata(-9999)
-        wd_domain.rio.to_raster(fr"{self.general_folder}\wd_input_domain.nc")
+        wd_domain.rio.to_raster(fr"{self.general_folder}/wd_input_domain.nc")
         self.wd_domain = wd_domain
 
         # Water surface elevation
@@ -78,7 +78,7 @@ class dataCollection:
         wse.rio.write_crs(2193, inplace=True)
         wse_domain = wse.rio.clip(self.geometry_domain)
         wse_domain.rio.write_nodata(-9999)
-        wse_domain.rio.to_raster(fr"{self.general_folder}\wse_input_domain.nc")
+        wse_domain.rio.to_raster(fr"{self.general_folder}/wse_input_domain.nc")
         self.wse_domain = wse_domain
 
         # Proportion
@@ -90,7 +90,7 @@ class dataCollection:
             proportion.rio.write_crs(2193, inplace=True)
             proportion_domain = proportion.rio.clip(self.geometry_domain)
             proportion_domain.rio.write_nodata(-9999)
-            proportion_domain.rio.to_raster(fr"{self.general_folder}\proportion_domain.nc")
+            proportion_domain.rio.to_raster(fr"{self.general_folder}/proportion_domain.nc")
             self.proportion_domain = proportion_domain
         else:
             pass
@@ -104,7 +104,7 @@ class dataCollection:
             manning.rio.write_crs(2193, inplace=True)
             manning_domain = manning.rio.clip(self.geometry_domain)
             manning_domain.rio.write_nodata(-9999)
-            manning_domain.rio.to_raster(fr"{self.general_folder}\manning_input_domain.nc")
+            manning_domain.rio.to_raster(fr"{self.general_folder}/manning_input_domain.nc")
             self.manning_domain = manning_domain
         else:
             pass
@@ -118,7 +118,7 @@ class dataCollection:
             roughness.rio.write_crs(2193, inplace=True)
             roughness_domain = roughness.zo.rio.clip(self.geometry_domain)
             roughness_domain.rio.write_nodata(-9999)
-            roughness_domain.rio.to_raster(fr"{self.general_folder}\roughness_input_domain.nc")
+            roughness_domain.rio.to_raster(fr"{self.general_folder}/roughness_input_domain.nc")
             self.roughness_domain = roughness_domain
 
         else:
@@ -133,7 +133,7 @@ class dataCollection:
             sd.rio.write_crs(2193, inplace=True)
             sd_domain = sd.rio.clip(self.geometry_domain)
             sd_domain.rio.write_nodata(-9999)
-            sd_domain.rio.to_raster(fr"{self.general_folder}\sd_domain.nc")
+            sd_domain.rio.to_raster(fr"{self.general_folder}/sd_domain.nc")
             self.sd_domain = sd_domain
         else:
             pass
@@ -158,7 +158,7 @@ class dataCollection:
         # Write out tiff file for other input generation
         self.dem_domain.rio.write_crs('epsg:2193', inplace=True)
         self.dem_domain.rio.write_nodata(-9999)
-        self.dem_domain.rio.to_raster(fr"{self.general_folder}\for_richdem.tiff")
+        self.dem_domain.rio.to_raster(fr"{self.general_folder}/for_richdem.tiff")
 
         return elev_df
 
@@ -285,7 +285,7 @@ class dataCollection:
 
         hanf_arr.rio.write_crs("epsg:2193", inplace=True)
         hanf_arr.rio.write_nodata(-9999)
-        hanf_arr.rio.to_raster(fr"{self.general_folder}\hanf_input_domain.nc")
+        hanf_arr.rio.to_raster(fr"{self.general_folder}/hanf_input_domain.nc")
 
         # Get x, y, z values again (not use the above one, just to make sure)
         hanf_xyz = xyz_array(hanf_arr, True, False, True)
@@ -314,7 +314,7 @@ class dataCollection:
         # Write out
         depthlabel_arr.rio.write_crs(2193)
         depthlabel_arr.rio.write_nodata(-9999)
-        depthlabel_arr.rio.to_raster(fr"{self.general_folder}\depthlabel_input_domain.nc")
+        depthlabel_arr.rio.to_raster(fr"{self.general_folder}/depthlabel_input_domain.nc")
 
         return depthlabel_value.flatten()
 
@@ -323,7 +323,7 @@ class dataCollection:
     def slope_input(self, type='slope_degrees'):
 
         # Read DEM
-        dem_slope = rd.LoadGDAL(fr"{self.general_folder}\for_richdem.tiff")
+        dem_slope = rd.LoadGDAL(fr"{self.general_folder}/for_richdem.tiff")
 
         # Get slope
         slope = rd.TerrainAttribute(dem_slope, attrib=type)
@@ -345,7 +345,7 @@ class dataCollection:
         # Write out
         slope_arr.rio.write_crs(2193)
         slope_arr.rio.write_nodata(-9999)
-        slope_arr.rio.to_raster(fr"{self.general_folder}\slope_input_domain.nc")
+        slope_arr.rio.to_raster(fr"{self.general_folder}/slope_input_domain.nc")
 
         return slope_reshape.flatten()
 
@@ -356,8 +356,8 @@ class dataCollection:
         if self.path_manning == None:
             # Convert roughness to manning
             manning_domain = zo_to_n(
-                fr"{self.general_folder}\roughness_input_domain.nc",
-                fr"{self.general_folder}\manning_input_domain.nc",
+                fr"{self.general_folder}/roughness_input_domain.nc",
+                fr"{self.general_folder}/manning_input_domain.nc",
                 1
             )
 
@@ -402,7 +402,7 @@ class dataCollection:
         # Write out
         flood_proximity.rio.write_crs(2193)
         flood_proximity.rio.write_nodata(-9999)
-        flood_proximity.rio.to_raster(fr"{self.general_folder}\floodproximity_input_domain.nc")
+        flood_proximity.rio.to_raster(fr"{self.general_folder}/floodproximity_input_domain.nc")
 
         return flood_proximity.values.flatten()
 
@@ -437,7 +437,7 @@ class dataCollection:
         # Write out
         sobel_arr.rio.write_crs(2193)
         sobel_arr.rio.write_nodata(-9999)
-        sobel_arr.rio.to_raster(fr"{self.general_folder}\sobeledgelabel_input_domain.nc")
+        sobel_arr.rio.to_raster(fr"{self.general_folder}/sobeledgelabel_input_domain.nc")
 
         return magnitude.flatten()
 
@@ -470,7 +470,7 @@ class dataCollection:
         # Write out
         sobel_arr.rio.write_crs(2193)
         sobel_arr.rio.write_nodata(-9999)
-        sobel_arr.rio.to_raster(fr"{self.general_folder}\sobeledgevalue_input_domain.nc")
+        sobel_arr.rio.to_raster(fr"{self.general_folder}/sobeledgevalue_input_domain.nc")
 
         return magnitude.flatten()
 
@@ -478,7 +478,7 @@ class dataCollection:
     def curvature_input(self):
 
         # Read DEM
-        dem_curvature = rd.LoadGDAL(fr"{self.general_folder}\for_richdem.tiff")
+        dem_curvature = rd.LoadGDAL(fr"{self.general_folder}/for_richdem.tiff")
 
         # Get curvature
         curvature = rd.TerrainAttribute(dem_curvature, attrib='curvature')
@@ -500,7 +500,7 @@ class dataCollection:
         # Write out
         curvature_arr.rio.write_crs(2193)
         curvature_arr.rio.write_nodata(-9999)
-        curvature_arr.rio.to_raster(fr"{self.general_folder}\curvature_input_domain.nc")
+        curvature_arr.rio.to_raster(fr"{self.general_folder}/curvature_input_domain.nc")
 
         return curvature_reshape.flatten()
 
@@ -509,7 +509,7 @@ class dataCollection:
     def flowaccumulation_input(self):
 
         # Read DEM
-        dem_flow_accumulation = rd.LoadGDAL(fr"{self.general_folder}\for_richdem.tiff")
+        dem_flow_accumulation = rd.LoadGDAL(fr"{self.general_folder}/for_richdem.tiff")
 
         # Get flow accumulation
         flow_accumulation = rd.FlowAccumulation(dem_flow_accumulation, method='D4')
@@ -531,7 +531,7 @@ class dataCollection:
         # Write out
         flow_accumulation_arr.rio.write_crs(2193)
         flow_accumulation_arr.rio.write_nodata(-9999)
-        flow_accumulation_arr.rio.to_raster(fr"{self.general_folder}\flowaccumulation_input_domain.nc")
+        flow_accumulation_arr.rio.to_raster(fr"{self.general_folder}/flowaccumulation_input_domain.nc")
 
         return flow_accumulation_reshape.flatten()
 
@@ -564,7 +564,7 @@ class dataCollection:
             # Write out
             proportion_label_arr.rio.write_crs(2193)
             proportion_label_arr.rio.write_nodata(-9999)
-            proportion_label_arr.rio.to_raster(fr"{self.general_folder}\proportionlabel_regression_input_domain.nc")
+            proportion_label_arr.rio.to_raster(fr"{self.general_folder}/proportionlabel_regression_input_domain.nc")
 
             return proportion_label.flatten()
 
@@ -600,7 +600,7 @@ class dataCollection:
             proportion_label_proximity.rio.write_crs(2193)
             proportion_label_proximity.rio.write_nodata(-9999)
             proportion_label_proximity.rio.to_raster(
-                fr"{self.general_folder}\proportionproximity_regression_input_domain.nc"
+                fr"{self.general_folder}/proportionproximity_regression_input_domain.nc"
             )
 
             return proportion_label_proximity.values.flatten()
@@ -658,7 +658,7 @@ class dataCollection:
             # Write out
             proximity_difference.rio.write_crs(2193)
             proximity_difference.rio.write_nodata(-9999)
-            proximity_difference.rio.to_raster(fr"{self.general_folder}\proportionproximity_regression_input_domain.nc")
+            proximity_difference.rio.to_raster(fr"{self.general_folder}/proportionproximity_regression_input_domain.nc")
 
             return proximity_difference.values.flatten()
 
@@ -691,7 +691,7 @@ class dataCollection:
         # Write out
         canny_edge_arr.rio.write_crs(2193)
         canny_edge_arr.rio.write_nodata(-9999)
-        # canny_edge_arr.rio.to_raster(fr"{self.general_folder}\cannyedge_input_domain.nc")
+        # canny_edge_arr.rio.to_raster(fr"{self.general_folder}/cannyedge_input_domain.nc")
 
         return canny_edge_arr.values.flatten()
 
@@ -721,7 +721,7 @@ class dataCollection:
         # Write out
         laplace_arr.rio.write_crs(2193)
         laplace_arr.rio.write_nodata(-9999)
-        laplace_arr.rio.to_raster(fr"{self.general_folder}\laplace_input_domain.nc")
+        laplace_arr.rio.to_raster(fr"{self.general_folder}/laplace_input_domain.nc")
 
         return laplace_magnitude.flatten()
 
@@ -748,7 +748,7 @@ class dataCollection:
         # Write out
         morphological_laplace_arr.rio.write_crs(2193)
         morphological_laplace_arr.rio.write_nodata(-9999)
-        morphological_laplace_arr.rio.to_raster(fr"{self.general_folder}\morphologicallaplace_input_domain.nc")
+        morphological_laplace_arr.rio.to_raster(fr"{self.general_folder}/morphologicallaplace_input_domain.nc")
 
         return morphological_laplace_conversion.flatten()
 
@@ -775,7 +775,7 @@ class dataCollection:
         # Write out
         gaussian_gradient_arr.rio.write_crs(2193)
         gaussian_gradient_arr.rio.write_nodata(-9999)
-        gaussian_gradient_arr.rio.to_raster(fr"{self.general_folder}\gaussiangradient_input_domain.nc")
+        gaussian_gradient_arr.rio.to_raster(fr"{self.general_folder}/gaussiangradient_input_domain.nc")
 
         return gaussian_gradient_conversion.flatten()
 
@@ -809,7 +809,7 @@ class dataCollection:
             # Write out
             sd_arr.rio.write_crs(2193)
             sd_arr.rio.write_nodata(-9999)
-            sd_arr.rio.to_raster(fr"{self.general_folder}\sdconversion_onput_domain.nc")
+            sd_arr.rio.to_raster(fr"{self.general_folder}/sdconversion_onput_domain.nc")
 
             return sd_values_conversion.flatten()
 
@@ -857,7 +857,7 @@ class dataCollection:
 
             # Write out
             proportion_label_arr.rio.write_crs(2193)
-            proportion_label_arr.rio.to_raster(fr"{self.general_folder}\proportionlabel_classification_output_domain.nc")
+            proportion_label_arr.rio.to_raster(fr"{self.general_folder}/proportionlabel_classification_output_domain.nc")
 
             return proportion_label.flatten()
 
@@ -927,7 +927,7 @@ class dataCollection:
             )
 
         # Write out csv
-        ml_df.to_csv(fr"{self.general_folder}\ml_full_{name_csv}_df_classification_proportion.csv", index=False)
+        ml_df.to_csv(fr"{self.general_folder}/ml_full_{name_csv}_df_classification_proportion.csv", index=False)
 
         return ml_df
 
@@ -996,7 +996,7 @@ class dataCollection:
             )
 
         # Write out csv
-        ml_df.to_csv(fr"{self.general_folder}\ml_full_{name_csv}_df_regression_proportion.csv", index=False)
+        ml_df.to_csv(fr"{self.general_folder}/ml_full_{name_csv}_df_regression_proportion.csv", index=False)
 
         return ml_df
 
@@ -1058,7 +1058,7 @@ class dataCollection:
             )
 
         # Write out csv
-        ml_df.to_csv(fr"{self.general_folder}\ml_full_{name_csv}_df_regression_sd.csv", index=False)
+        ml_df.to_csv(fr"{self.general_folder}/ml_full_{name_csv}_df_regression_sd.csv", index=False)
 
         return ml_df
 

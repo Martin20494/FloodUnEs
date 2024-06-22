@@ -243,9 +243,9 @@ class dataPreparation:
             train_df, val_df = train_test_split(train_val_df, random_state=42, train_size=0.75, shuffle=True)
 
             # Write out just incase
-            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_classification.csv", index=False)
-            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_classification.csv", index=False)
-            test_df.to_csv(fr"{self.para_path['train']['general_folder']}\test_df_classification.csv", index=False)
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}/train_df_classification.csv", index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}/val_df_classification.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['train']['general_folder']}/test_df_classification.csv", index=False)
 
             # Flatten data
             x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:11])].to_numpy().T
@@ -279,9 +279,9 @@ class dataPreparation:
             test_df = test_collection.loadpara_into_dataframe_classification(name_csv='test')
 
             # Write out just incase
-            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_classification.csv", index=False)
-            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_classification.csv", index=False)
-            test_df.to_csv(fr"{self.para_path['test']['general_folder']}\test_df_classification.csv", index=False)
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}/train_df_classification.csv", index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}/val_df_classification.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['test']['general_folder']}/test_df_classification.csv", index=False)
 
             # Flatten data
             x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:11])].to_numpy().T
@@ -417,10 +417,10 @@ class dataPreparation:
             train_df, val_df = train_test_split(train_val_df, random_state=42, train_size=0.75, shuffle=True)
 
             # Write out just incase
-            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_regression_proportion.csv",
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}/train_df_regression_proportion.csv",
                             index=False)
-            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_regression_proportion.csv", index=False)
-            test_df.to_csv(fr"{self.para_path['train']['general_folder']}\test_df_regression_proportion.csv", index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}/val_df_regression_proportion.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['train']['general_folder']}/test_df_regression_proportion.csv", index=False)
 
             # Flatten data
             x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:12])].to_numpy().T
@@ -454,9 +454,9 @@ class dataPreparation:
             test_df = test_collection.loadpara_into_dataframe_regression_proportion(name_csv='test')
 
             # Write out just incase
-            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_regression_proportion.csv", index=False)
-            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_regression_proportion.csv", index=False)
-            test_df.to_csv(fr"{self.para_path['test']['general_folder']}\test_df_regression_proportion.csv",
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}/train_df_regression_proportion.csv", index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}/val_df_regression_proportion.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['test']['general_folder']}/test_df_regression_proportion.csv",
                            index=False)
 
             # Flatten data
@@ -492,7 +492,7 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{self.para_path['train']['general_folder']}\relevance_proportion_first_level.jpg",
+                fr"{self.para_path['train']['general_folder']}/relevance_proportion_first_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -516,7 +516,7 @@ class dataPreparation:
             plt.hist(y_train_flatten_channel_resampled_NO_0_001, bins=100)
             # Save fig
             plt.savefig(
-                fr"{self.para_path['train']['general_folder']}\resample_proportion_first_level.jpg",
+                fr"{self.para_path['train']['general_folder']}/resample_proportion_first_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -540,7 +540,7 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{self.para_path['train']['general_folder']}\relevance_proportion_second_level.jpg",
+                fr"{self.para_path['train']['general_folder']}/relevance_proportion_second_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -560,7 +560,7 @@ class dataPreparation:
             plt.hist(y_train_flatten_channel_resampled_002, bins=100)
             # Save fig
             plt.savefig(
-                fr"{self.para_path['train']['general_folder']}\resample_proportion_second_level.jpg",
+                fr"{self.para_path['train']['general_folder']}/resample_proportion_second_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -581,7 +581,7 @@ class dataPreparation:
             plt.hist(y_train_flatten_channel_full, bins=100)
             # Save fig
             plt.savefig(
-                fr"{self.para_path['train']['general_folder']}\resample_proportion_full.jpg",
+                fr"{self.para_path['train']['general_folder']}/resample_proportion_full.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -702,10 +702,10 @@ class dataPreparation:
             train_df, val_df = train_test_split(train_val_df, random_state=42, train_size=0.75, shuffle=True)
 
             # Write out just incase
-            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_regression_sd.csv",
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}/train_df_regression_sd.csv",
                             index=False)
-            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_regression_sd.csv", index=False)
-            test_df.to_csv(fr"{self.para_path['train']['general_folder']}\test_df_regression_sd.csv", index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}/val_df_regression_sd.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['train']['general_folder']}/test_df_regression_sd.csv", index=False)
 
             # Flatten data
             x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:10])].to_numpy().T
@@ -739,9 +739,9 @@ class dataPreparation:
             test_df = test_collection.loadpara_into_dataframe_regression_sd(name_csv='test')
 
             # Write out just incase
-            train_df.to_csv(fr"{self.para_path['train']['general_folder']}\train_df_regression_sd.csv", index=False)
-            val_df.to_csv(fr"{self.para_path['train']['general_folder']}\val_df_regression_sd.csv", index=False)
-            test_df.to_csv(fr"{self.para_path['test']['general_folder']}\test_df_regression_sd.csv", index=False)
+            train_df.to_csv(fr"{self.para_path['train']['general_folder']}/train_df_regression_sd.csv", index=False)
+            val_df.to_csv(fr"{self.para_path['train']['general_folder']}/val_df_regression_sd.csv", index=False)
+            test_df.to_csv(fr"{self.para_path['test']['general_folder']}/test_df_regression_sd.csv", index=False)
 
             # Flatten data
             x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:10])].to_numpy().T
@@ -775,7 +775,7 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{self.para_path['train']['general_folder']}\relevance_sd_level.jpg",
+                fr"{self.para_path['train']['general_folder']}/relevance_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -784,7 +784,7 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{self.para_path['train']['general_folder']}\distribution_full_sd_level.jpg",
+                fr"{self.para_path['train']['general_folder']}/distribution_full_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -793,7 +793,7 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{self.para_path['train']['general_folder']}\distribution_no0_sd_level.jpg",
+                fr"{self.para_path['train']['general_folder']}/distribution_no0_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -814,7 +814,7 @@ class dataPreparation:
             plt.close()
             # Save fig
             plt.savefig(
-                fr"{self.para_path['train']['general_folder']}\distribution_afterresampling_sd_level.jpg",
+                fr"{self.para_path['train']['general_folder']}/distribution_afterresampling_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
