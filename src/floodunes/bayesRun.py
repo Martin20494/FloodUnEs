@@ -286,12 +286,6 @@ class runBayesClassification():
             writer.writerow(['epoch', 'train_loss_total', 'val_loss_total',
                              'Overall_acc', 'No_acc', 'MAYBE_acc', 'YES_acc'])
 
-        # Prepare result file
-        with open(fr"{self.train_folder}/result_classification.csv", 'w+', newline='') as f_out:
-            writer = csv.writer(f_out, delimiter=',')
-            writer.writerow(['epoch', 'train_loss_total', 'val_loss_total',
-                             'Overall_acc', 'No_acc', 'MAYBE_acc', 'YES_acc'])
-
         for epoch in range(checkpoint['epoch']+2, epoch_new, 1):
 
             train_loss_total = checkpoint['train_loss_total']
