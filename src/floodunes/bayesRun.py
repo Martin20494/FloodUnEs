@@ -474,9 +474,9 @@ class runBayesClassification():
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         # prediction_raster.rio.write_nodata(-9999)
-        prediction_raster.rio.to_raster(
-            fr"{self.test_folder}/prediction/classification_proportion_prediction.nc"
-        )
+        # prediction_raster.rio.to_raster(
+        #     fr"{self.test_folder}/prediction/classification_proportion_prediction.nc"
+        # )
 
         # Write out different file
         different_values = predict_list_np_flatten - test_list_np_flatten
@@ -491,9 +491,9 @@ class runBayesClassification():
         )
         different_raster.rio.write_crs("epsg:2193", inplace=True)
         different_raster.rio.write_nodata(-9999)
-        different_raster.rio.to_raster(
-            fr"{self.test_folder}/prediction/different_classification_proportion_prediction.nc"
-        )
+        # different_raster.rio.to_raster(
+        #     fr"{self.test_folder}/prediction/different_classification_proportion_prediction.nc"
+        # )
 
 
         # Produce confusion matrix
@@ -526,6 +526,8 @@ class runBayesClassification():
         print('recall: {}'.format(recall))
         print('fscore: {}'.format(fscore))
         print('support: {}'.format(support))
+
+        return prediction_raster
 
 
 
