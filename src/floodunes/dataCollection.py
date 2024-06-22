@@ -691,7 +691,7 @@ class dataCollection:
         # Write out
         canny_edge_arr.rio.write_crs(2193)
         canny_edge_arr.rio.write_nodata(-9999)
-        # canny_edge_arr.rio.to_raster(fr"{self.general_folder}/cannyedge_input_domain.nc")
+        canny_edge_arr.rio.to_raster(fr"{self.general_folder}/cannyedge_input_domain.nc")
 
         return canny_edge_arr.values.flatten()
 

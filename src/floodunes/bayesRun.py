@@ -475,8 +475,7 @@ class runBayesClassification():
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         # prediction_raster.rio.write_nodata(-9999)
         prediction_raster.rio.to_raster(
-            fr"{self.test_folder}/prediction/classification_proportion_prediction.nc", 
-            dtype=np.int32
+            fr"{self.test_folder}/prediction/classification_proportion_prediction.nc"
         )
 
         # Write out different file
