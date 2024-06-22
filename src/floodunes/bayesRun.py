@@ -525,9 +525,6 @@ class runBayesClassification():
         print('fscore: {}'.format(fscore))
         print('support: {}'.format(support))
 
-        return prediction_raster
-
-
 
 
 
