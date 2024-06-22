@@ -491,10 +491,9 @@ class runBayesClassification():
             attrs=ex_raster.attrs
         )
         different_raster.rio.write_crs("epsg:2193", inplace=True)
-        # different_raster.rio.write_nodata(-9999)
+        different_raster.rio.write_nodata(-9999)
         different_raster.rio.to_raster(
-            fr"{self.test_folder}/prediction/different_classification_proportion_prediction.nc",
-            dtype=np.int32
+            fr"{self.test_folder}/prediction/different_classification_proportion_prediction.nc"
         )
 
 
@@ -795,8 +794,7 @@ class runBayesRegressionProportion():
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(-9999)
         prediction_raster.rio.to_raster(
-            fr"{self.test_folder}/prediction/regression_proportion_prediction.nc", 
-            dtype=np.int32
+            fr"{self.test_folder}/prediction/regression_proportion_prediction.nc"
         )
 
         return predict_list, test_list
@@ -1063,8 +1061,7 @@ class runBayesRegressionSD():
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(-9999)
         prediction_raster.rio.to_raster(
-            fr"{self.test_folder}/prediction/sd_regression_prediction.nc",
-            dtype=np.int32
+            fr"{self.test_folder}/prediction/sd_regression_prediction.nc"
         )
 
 
@@ -1146,7 +1143,7 @@ class runEstimation():
         )
         estimate_raster.rio.write_crs("epsg:2193", inplace=True)
         estimate_raster.rio.write_nodata(-9999)
-        estimate_raster.rio.to_raster(fr"{self.estimate_folder}/classification_proportion_results.nc", dtype=np.int32)
+        estimate_raster.rio.to_raster(fr"{self.estimate_folder}/classification_proportion_results.nc")
 
 
     def estimate_proportion_regression_model(self,
@@ -1201,8 +1198,7 @@ class runEstimation():
         estimate_raster.rio.write_crs("epsg:2193", inplace=True)
         estimate_raster.rio.write_nodata(-9999)
         estimate_raster.rio.to_raster(
-            fr"{self.estimate_folder}/regression_proportion_results.nc",
-            dtype=np.int32
+            fr"{self.estimate_folder}/regression_proportion_results.nc"
         )
 
     def estimate_sd_regression_model(self,
@@ -1255,6 +1251,5 @@ class runEstimation():
         estimate_raster.rio.write_crs("epsg:2193", inplace=True)
         estimate_raster.rio.write_nodata(-9999)
         estimate_raster.rio.to_raster(
-            fr"{self.estimate_folder}/regression_sd_results.nc",
-            dtype=np.int32
+            fr"{self.estimate_folder}/regression_sd_results.nc"
         )
