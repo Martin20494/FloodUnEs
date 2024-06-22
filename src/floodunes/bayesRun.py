@@ -128,7 +128,7 @@ class runBayesClassification():
         class1_acc_final = 0
 
         # Prepare result file
-        with open(fr"{self.train_folder}/result_classification.csv", 'w+', newline='') as f_out:
+        with open(fr"{self.train_folder}/result_classification_proportion.csv", 'w+', newline='') as f_out:
             writer = csv.writer(f_out, delimiter=',')
             writer.writerow(['epoch', 'train_loss_total', 'val_loss_total',
                              'Overall_acc', 'No_acc', 'MAYBE_acc', 'YES_acc'])
@@ -256,7 +256,7 @@ class runBayesClassification():
 
             _results = [epoch, train_loss_total, val_loss_total, accuracy, class0_acc, class1_acc, class2_acc]
 
-            with open(fr"{self.train_folder}/result_classification.csv", "a", newline="") as f_out:
+            with open(fr"{self.train_folder}/result_classification_proportion.csv", "a", newline="") as f_out:
                 writer = csv.writer(f_out, delimiter=',')
                 writer.writerow(_results)
 
@@ -278,12 +278,21 @@ class runBayesClassification():
         class1_acc_final = checkpoint['class1_acc']
 
         # Prepare result file
+        with open(
+                fr"{self.train_folder}/result_retrained_classification_proportion.csv", 'w+',
+                newline=''
+        ) as f_out:
+            writer = csv.writer(f_out, delimiter=',')
+            writer.writerow(['epoch', 'train_loss_total', 'val_loss_total',
+                             'Overall_acc', 'No_acc', 'MAYBE_acc', 'YES_acc'])
+
+        # Prepare result file
         with open(fr"{self.train_folder}/result_classification.csv", 'w+', newline='') as f_out:
             writer = csv.writer(f_out, delimiter=',')
             writer.writerow(['epoch', 'train_loss_total', 'val_loss_total',
                              'Overall_acc', 'No_acc', 'MAYBE_acc', 'YES_acc'])
 
-        for epoch in range(checkpoint['epoch']+1, epoch_new, 1):
+        for epoch in range(checkpoint['epoch']+2, epoch_new, 1):
 
             train_loss_total = checkpoint['train_loss_total']
 
@@ -404,7 +413,10 @@ class runBayesClassification():
 
             _results = [epoch, train_loss_total, val_loss_total, accuracy, class0_acc, class1_acc, class2_acc]
 
-            with open(fr"{self.train_folder}/result_classification.csv", "a", newline="") as f_out:
+            with open(
+                    fr"{self.train_folder}/result_retrained_classification_proportion.csv", "a",
+                    newline=""
+            ) as f_out:
                 writer = csv.writer(f_out, delimiter=',')
                 writer.writerow(_results)
 
@@ -461,7 +473,7 @@ class runBayesClassification():
             attrs=ex_raster.attrs
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
-        prediction_raster.rio.write_nodata(-9999)
+        # prediction_raster.rio.write_nodata(-9999)
         prediction_raster.rio.to_raster(
             fr"{self.test_folder}/prediction/classification_proportion_prediction.nc", 
             dtype=np.int32
@@ -479,7 +491,7 @@ class runBayesClassification():
             attrs=ex_raster.attrs
         )
         different_raster.rio.write_crs("epsg:2193", inplace=True)
-        different_raster.rio.write_nodata(-9999)
+        # different_raster.rio.write_nodata(-9999)
         different_raster.rio.to_raster(
             fr"{self.test_folder}/prediction/different_classification_proportion_prediction.nc",
             dtype=np.int32
@@ -590,6 +602,11 @@ class runBayesRegressionProportion():
         # Set initial validation loss
         min_val_loss = np.Inf
 
+        # Prepare result file
+        with open(fr"{self.train_folder}/result_regression_proportion.csv", 'w+', newline='') as f_out:
+            writer = csv.writer(f_out, delimiter=',')
+            writer.writerow(['epoch', 'train_loss_total', 'val_loss_total'])
+
         for epoch in range(total_epochs):
             # Train
             train_loss_total = 0
@@ -664,7 +681,12 @@ class runBayesRegressionProportion():
         # Set initial validation loss
         min_val_loss = np.Inf
 
-        for epoch in range(checkpoint['epoch'] + 1, epoch_new, 1):
+        # Prepare result file
+        with open(fr"{self.train_folder}/result_retrained_regression_proportion.csv", 'w+', newline='') as f_out:
+            writer = csv.writer(f_out, delimiter=',')
+            writer.writerow(['epoch', 'train_loss_total', 'val_loss_total'])
+
+        for epoch in range(checkpoint['epoch']+2, epoch_new, 1):
             # Train
             train_loss_total = 0
             retrain_model.train()
@@ -716,7 +738,7 @@ class runBayesRegressionProportion():
 
             _results = [epoch, train_loss_total, val_loss_total]
 
-            with open(fr"{self.train_folder}/result_regression_proportion.csv", "a", newline="") as f_out:
+            with open(fr"{self.train_folder}/result_retrained_regression_proportion.csv", "a", newline="") as f_out:
                 writer = csv.writer(f_out, delimiter=',')
                 writer.writerow(_results)
 
@@ -778,7 +800,6 @@ class runBayesRegressionProportion():
         )
 
         return predict_list, test_list
-
 
 
 
@@ -853,6 +874,11 @@ class runBayesRegressionSD():
         # Set initial validation loss
         min_val_loss = np.Inf
 
+        # Prepare result file
+        with open(fr"{self.train_folder}/result_regression_sd.csv", 'w+', newline='') as f_out:
+            writer = csv.writer(f_out, delimiter=',')
+            writer.writerow(['epoch', 'train_loss_total', 'val_loss_total'])
+
         for epoch in range(total_epochs):
             # Train
             train_loss_total = 0
@@ -925,7 +951,12 @@ class runBayesRegressionSD():
         # Set initial validation loss
         min_val_loss = np.Inf
 
-        for epoch in range(checkpoint['epoch']+1, epoch_new, 1):
+        # Prepare result file
+        with open(fr"{self.train_folder}/result_retrained_regression_proportion.csv", 'w+', newline='') as f_out:
+            writer = csv.writer(f_out, delimiter=',')
+            writer.writerow(['epoch', 'train_loss_total', 'val_loss_total'])
+
+        for epoch in range(checkpoint['epoch']+2, epoch_new, 1):
             # Train
             train_loss_total = 0
             retrain_model.train()
@@ -977,7 +1008,7 @@ class runBayesRegressionSD():
 
             _results = [epoch, train_loss_total, val_loss_total]
 
-            with open(fr"{self.train_folder}/result_regression_sd.csv", "a", newline="") as f_out:
+            with open(fr"{self.train_folder}/result_retrained_regression_sd.csv", "a", newline="") as f_out:
                 writer = csv.writer(f_out, delimiter=',')
                 writer.writerow(_results)
 
