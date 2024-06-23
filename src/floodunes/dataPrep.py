@@ -780,7 +780,7 @@ class dataPreparation:
 
             # Original
             fig, ax0 = plt.subplots(figsize=(6, 6))
-            ax0.hist(y_training, bins=500)
+            ax0.hist(y_training, bins=100)
             fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/original_histogram_sd.jpg",
                 bbox_inches='tight', dpi=600
@@ -805,7 +805,7 @@ class dataPreparation:
             )
 
             fig, ax2 = plt.subplots(figsize=(6, 6))
-            ax2.hist(y_training[y_training != 0], bins=500)
+            ax2.hist(y_training[y_training != 0], bins=100)
             ax2.set_title("No zero")
             # Save fig
             fig.savefig(
@@ -826,7 +826,7 @@ class dataPreparation:
             y_train_flatten_channel_R = y_train_flatten_channel_resampled.copy()
 
             fig, ax3 = plt.subplots(figsize=(6, 6))
-            ax3.hist(y_train_flatten_channel_R, bins=50)
+            ax3.hist(y_train_flatten_channel_R, bins=100)
             ax3.set_title("Full after resampling")
             # Save fig
             fig.savefig(
