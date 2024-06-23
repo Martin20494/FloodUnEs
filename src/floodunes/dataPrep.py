@@ -491,7 +491,6 @@ class dataPreparation:
             ax1.set_ylabel('Relevance')
             ax1.set_xlabel('Target')
             ax1.set_title('Rare domain from both tails')
-            ax1.show()
             # Save fig
             fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/relevance_proportion_first_level.jpg",
@@ -540,7 +539,6 @@ class dataPreparation:
             ax3.set_ylabel('Relevance')
             ax3.set_xlabel('Target')
             ax3.set_title('Rare domain from both tails')
-            ax3.show()
             # Save fig
             fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/relevance_proportion_second_level.jpg",
