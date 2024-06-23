@@ -479,7 +479,7 @@ class dataPreparation:
             ax0.hist(y_training_001, bins=100)
             # Save fig
             fig.savefig(
-                fr"{self.para_path['train']['general_folder']}/original_histogram.jpg",
+                fr"{self.para_path['train']['general_folder']}/original_histogram_proportion.jpg",
                 bbox_inches='tight', dpi=600
             )
 
@@ -777,6 +777,15 @@ class dataPreparation:
             # Get variables
             x_training = x_train_flatten_channel.transpose().copy()
             y_training = y_train_flatten_channel.copy()
+
+            # Original
+            fig, ax0 = plt.subplots(figsize=(6, 6))
+            ax0.hist(y_training, bins=100)
+            fig.savefig(
+                fr"{self.para_path['train']['general_folder']}/original_histogram_sd.jpg",
+                bbox_inches='tight', dpi=600
+            )
+
             # Get resampled relevance
             relevance_middle = resreg.sigmoid_relevance(
                 y_training,
@@ -784,32 +793,29 @@ class dataPreparation:
                 ch=self.para_path['train']['resample_sd']['ch'])
 
             # Plot two-sided relevance values (left and right tails)
-            plt.scatter(y_training, relevance_middle, s=.1)
-            plt.ylabel('Relevance')
-            plt.xlabel('Target')
-            plt.title('Rare domain from both tails')
-            plt.show()
-            plt.close()
+            fig, ax1 = plt.subplots(figsize=(6, 6))
+            ax1.scatter(y_training, relevance_middle, s=.1)
+            ax1.set_ylabel('Relevance')
+            ax1.set_xlabel('Target')
+            ax1.set_title('Rare domain from both tails')
             # Save fig
-            plt.savefig(
+            fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/relevance_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
-            plt.hist(y_training, bins=100)
-            plt.show()
-            plt.close()
+            fig, ax2 = plt.subplots(figsize=(6, 6))
+            ax2.hist(y_training, bins=100)
             # Save fig
-            plt.savefig(
+            fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/distribution_full_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
 
-            plt.hist(y_training[y_training != 0], bins=100)
-            plt.show()
-            plt.close()
+            fig, ax3 = plt.subplots(figsize=(6, 6))
+            ax3.hist(y_training[y_training != 0], bins=100)
             # Save fig
-            plt.savefig(
+            fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/distribution_no0_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
@@ -826,11 +832,10 @@ class dataPreparation:
             x_train_flatten_channel_R = x_train_flatten_channel_resampled.T.copy()
             y_train_flatten_channel_R = y_train_flatten_channel_resampled.copy()
 
-            plt.hist(y_train_flatten_channel_R, bins=50)
-            plt.show()
-            plt.close()
+            fig, ax4 = plt.subplots(figsize=(6, 6))
+            ax4.hist(y_train_flatten_channel_R, bins=50)
             # Save fig
-            plt.savefig(
+            fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/distribution_afterresampling_sd_level.jpg",
                 bbox_inches='tight', dpi=600
             )
