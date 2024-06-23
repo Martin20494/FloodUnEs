@@ -535,7 +535,11 @@ class dataPreparation:
             # Plot two-sided relevance values (left and right tails)
             fig, ax3 = plt.subplots(figsize=(6, 6))
             ax3.scatter(y_training_002, relevance_middle_002, s=.1)
-            ax3.axhline(.48, linestyle='--', color='black')
+            ax3.axhline(
+                self.para_path['train']['resample_proportion']['filters_num_002'],
+                linestyle='--',
+                color='black'
+            )
             ax3.set_ylabel('Relevance')
             ax3.set_xlabel('Target')
             ax3.set_title('Rare domain from both tails')
