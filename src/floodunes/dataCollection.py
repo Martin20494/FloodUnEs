@@ -1017,6 +1017,7 @@ class dataCollection:
     def loadpara_into_dataframe_regression_sd(self, name_csv='train'):
 
         # Call out each para
+        elev_IN = self.dem_input() # This is too create richdem files
         # Depth includes 3 columns - x, y, depth - so the next para will be counted from 3
         depth_IN = self.depth_input(sd=True)
         # 3. Slope
