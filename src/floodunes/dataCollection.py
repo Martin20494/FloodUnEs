@@ -67,17 +67,25 @@ class dataCollection:
             fr"{path_wd}"
         )
         wd.rio.write_crs(2193, inplace=True)
-        wd_domain = wd.rio.clip(self.geometry_domain)
-        wd_domain.rio.write_nodata(-9999)
-        wd_domain.rio.to_raster(fr"{self.general_folder}/wd_input_domain.nc")
-        self.wd_domain = wd_domain
+        wd_domain_origin = wd.rio.clip(self.geometry_domain)
+        wd_domain_filter = wd_domain_origin.where(
+            wd_domain_origin >= 0.1,
+            other=0
+        )
+        wd_domain_filter.rio.write_nodata(-9999)
+        wd_domain_filter.rio.to_raster(fr"{self.general_folder}/wd_input_domain.nc")
+        self.wd_domain = wd_domain_filter
 
         # Water surface elevation
         wse = rxr.open_rasterio(
             fr"{path_wse}"
         )
         wse.rio.write_crs(2193, inplace=True)
-        wse_domain = wse.rio.clip(self.geometry_domain)
+        wse_domain_origin = wse.rio.clip(self.geometry_domain)
+        wse_domain = wse_domain_origin.where(
+            self.wd_domain >= 0.1,
+            other=-9999
+        )
         wse_domain.rio.write_nodata(-9999)
         wse_domain.rio.to_raster(fr"{self.general_folder}/wse_input_domain.nc")
         self.wse_domain = wse_domain

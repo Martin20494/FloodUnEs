@@ -468,7 +468,7 @@ class runBayesClassification():
             dims=['y', 'x'],
             coords={
                 'x': (['x'], ex_raster.x.values),
-                'y': (['y'], ex_raster.y.values[::-1])
+                'y': (['y'], ex_raster.y.values)
             },
             attrs=ex_raster.attrs
         )
@@ -486,7 +486,7 @@ class runBayesClassification():
             dims=['y', 'x'],
             coords={
                 'x': (['x'], ex_raster.x.values),
-                'y': (['y'], ex_raster.y.values[::-1])
+                'y': (['y'], ex_raster.y.values)
             },
             attrs=ex_raster.attrs
         )
@@ -678,7 +678,7 @@ class runBayesRegressionProportion():
         retrain_model_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
         # Set initial validation loss
-        min_val_loss = np.Inf
+        min_val_loss = checkpoint['val_loss_total']
 
         # Prepare result file
         with open(fr"{self.train_folder}/result_retrained_regression_proportion.csv", 'w+', newline='') as f_out:
@@ -791,7 +791,7 @@ class runBayesRegressionProportion():
             dims=['y', 'x'],
             coords={
                 'x': (['x'], ex_raster.x.values),
-                'y': (['y'], ex_raster.y.values[::-1])
+                'y': (['y'], ex_raster.y.values)
             },
             attrs=ex_raster.attrs
         )
@@ -801,9 +801,6 @@ class runBayesRegressionProportion():
             fr"{self.test_folder}/prediction/regression_proportion_prediction.nc",
             dtype=np.float64
         )
-
-        return predict_list, test_list
-
 
 
 
@@ -952,7 +949,7 @@ class runBayesRegressionSD():
         retrain_model_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
         # Set initial validation loss
-        min_val_loss = np.Inf
+        min_val_loss = checkpoint['val_loss_total']
 
         # Prepare result file
         with open(fr"{self.train_folder}/result_retrained_regression_proportion.csv", 'w+', newline='') as f_out:
