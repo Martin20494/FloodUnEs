@@ -92,7 +92,7 @@ class dataCollection:
 
         # Proportion
         self.path_proportion = path_proportion
-        if self.path_proportion:
+        if self.path_proportion != None:
             proportion = rxr.open_rasterio(
                 fr"{self.path_proportion}"
             )
@@ -1077,6 +1077,182 @@ class dataCollection:
         return ml_df
 
 
+
+    def loadpara_into_dataframe_testextra(self,
+                                          type,
+                                          name_csv='testextra'):
+
+        if type == 'classification_proportion':
+
+            # Call out each para
+            # DEM - include 3 columns - x, y, dem - so the next para will be counted from 3
+            elev_IN = self.dem_input()
+            # 3. HANF
+            hanf_IN = self.hanf_input()
+            # 4. Depth label
+            depthlabel_IN = self.depthlabel_input()
+            # 5. Slope
+            slope_IN = self.slope_input()
+            # 6. Manning
+            manning_IN = self.manning_input()
+            # 7. Flood proximity
+            floodproximity_IN = self.floodproximity_input()
+            # 8. Sobel edge label
+            sobeledgelabel_IN = self.sobeledgelabel_input()
+            # 9. Curvature
+            curvature_IN = self.curvature_input()
+            # 10. Flow accumulation
+            flowaccumulation_IN = self.flowaccumulation_input()
+            # 11. Proportion label
+            proportionlabel_OUT = self.proportionlabel_output()
+
+            # Create dataframe
+            ml_df = elev_IN.copy(deep=True)
+            # Get name list for each para. Start from 'hanf'
+            para_names_list = [
+                'hanf',
+                'depthlabel',
+                'slope',
+                'manning',
+                'floodproximity',
+                'sobeledgelabel',
+                'curvature',
+                'flowaccumulation',
+                'proportionlabel'
+            ]
+            # Get list of para values. Start from 'hanf'
+            para_values_list = [
+                hanf_IN,
+                depthlabel_IN,
+                slope_IN,
+                manning_IN,
+                floodproximity_IN,
+                sobeledgelabel_IN,
+                curvature_IN,
+                flowaccumulation_IN,
+                proportionlabel_OUT
+            ]
+
+        elif type == 'regression_proportion':
+
+            # Call out each para
+            # DEM - include 3 columns - x, y, dem - so the next para will be counted from 3
+            elev_IN = self.dem_input()
+            # 3. HANF
+            hanf_IN = self.hanf_input()
+            # 4. Depth
+            depth_IN = self.depth_input()
+            # 5. Slope
+            slope_IN = self.slope_input('slope_riserun')
+            # 6. Roughness
+            roughness_IN = self.roughness_input()
+            # 7. Curvature
+            curvature_IN = self.curvature_input()
+            # 8. Flow accumulation
+            flowaccumulation_IN = self.flowaccumulation_input()
+            # 9. Proportion label
+            proportionlabel_IN = self.proportionlabel_train_input()
+            # 10. Proportion proximity
+            proportionproximity_IN = self.proportionproximity_input()
+            # 11. Proximity difference
+            proximitydifference_IN = self.proximitydifference_input()
+            # 12. Proportion
+            proportion_OUT = self.proportion_output()
+
+            # Create dataframe
+            ml_df = elev_IN.copy(deep=True)
+            # Get name list for each para. Start from 'hanf'
+            para_names_list = [
+                'hanf',
+                'depth',
+                'slope',
+                'roughness',
+                'curvature',
+                'flowaccumulation',
+                'proportionlabel',
+                'proportionproximity',
+                'proximitydifference',
+                'proportion'
+            ]
+            # Get list of para values. Start from 'hanf'
+            para_values_list = [
+                hanf_IN,
+                depth_IN,
+                slope_IN,
+                roughness_IN,
+                curvature_IN,
+                flowaccumulation_IN,
+                proportionlabel_IN,
+                proportionproximity_IN,
+                proximitydifference_IN,
+                proportion_OUT
+            ]
+
+        else:
+
+            # Call out each para
+            # Depth includes 3 columns - x, y, depth - so the next para will be counted from 3
+            depth_IN = self.depth_input(sd=True)
+            # 3. Slope
+            slope_IN = self.slope_input('slope_riserun')
+            # 4. Manning
+            manning_IN = self.manning_input()
+            # 5. Sobel edge values
+            sobeledgevalue_IN = self.sobeledgevalue_input()
+            # 6. Canny edge
+            cannyedge_IN = self.cannyedge_input()
+            # 7. Laplace
+            laplace_IN = self.laplace_input()
+            # 8. Morphological laplace
+            morphologicallaplace_IN = self.morphologicallaplace_input()
+            # 9. Gaussian gradient
+            gaussiangradient_IN = self.gaussiangradient_input()
+            # 10. SD
+            sd_OUT = self.sd_output()
+
+            # Create dataframe
+            ml_df = depth_IN.copy(deep=True)
+            # Get name list for each para. Start from 'hanf'
+            para_names_list = [
+                'slope',
+                'manning',
+                'sobeledgevalue',
+                'cannyedge',
+                'laplace',
+                'morphologicallaplace',
+                'gaussiangradient',
+                'sd'
+            ]
+            # Get list of para values. Start from 'hanf'
+            para_values_list = [
+                slope_IN,
+                manning_IN,
+                sobeledgevalue_IN,
+                cannyedge_IN,
+                laplace_IN,
+                morphologicallaplace_IN,
+                gaussiangradient_IN,
+                sd_OUT
+            ]
+
+
+        # Load all para into dataframe
+        for i in range(len(para_values_list)):
+            para_order = i + 3
+            ml_df.insert(
+                loc=para_order,
+                column=para_names_list[i],
+                value=para_values_list[i]
+            )
+
+        # Write out csv
+        ml_df.to_csv(fr"{self.general_folder}/ml_full_{name_csv}_df_regression_sd.csv", index=False)
+
+        return ml_df
+
+
+
+
     def loadpara_into_dataframe_estimate(self,
                                          type,
                                          name_csv='estimate'):
@@ -1128,7 +1304,7 @@ class dataCollection:
                 flowaccumulation_IN
             ]
 
-        elif type == 'regression_proportionn':
+        elif type == 'regression_proportion':
 
             # Call out each para
             # DEM - include 3 columns - x, y, dem - so the next para will be counted from 3

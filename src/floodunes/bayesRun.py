@@ -37,6 +37,7 @@ from .bayesFuncClassification import BayesianNetwork, minibatch_weight
 from .bayesFuncRegression import MLP_BBB
 from .dataPrep import dataPreparation
 from .dataPrepEstimate import dataPreparationEstimate
+from .dataPrepTestExtra import dataPreparationTestExtra
 
 torch.set_default_dtype(torch.float64)
 
@@ -482,7 +483,7 @@ class runBayesClassification():
         # Write out different file
         different_values = predict_list_np_flatten - test_list_np_flatten
         different_raster = xr.DataArray(
-            data=prediction_values[0],
+            data=different_values[0],
             dims=['y', 'x'],
             coords={
                 'x': (['x'], ex_raster.x.values),
@@ -1071,6 +1072,290 @@ class runBayesRegressionSD():
             dtype=np.float64
         )
 
+
+
+class runTestExtra():
+
+    def __init__(self,
+                 parameter_path,
+                 batchsize=2048,
+                 setseed=2,
+                 num_workers=1
+                 ):
+
+        # Set up set seed
+        self.setseed = setseed
+
+        # Set up parameters for getting data
+        with open(parameter_path, 'r') as para_path_r:
+            self.para_path = json.load(para_path_r)
+
+
+        # Call data
+        data_preparation = dataPreparationTestExtra(self.para_path, setseed=self.setseed)
+
+        # Set data loaders
+        testextraloader = data_preparation.pixel_dataloader_testextra(
+            type=type, batchsize=batchsize, num_workers=num_workers
+        )
+        self.testextraloader = testextraloader
+
+
+    def testextra_proportion_classification_model(self,
+                                                 model_path,
+                                                 number_layers=9
+                                                 ):
+        # Create path
+        Path(
+            fr"{self.para_path['testextra']['general_folder']}/model_classification_proportion"
+        ).mkdir(parents=True, exist_ok=True)
+        testextra_folder = fr"{self.para_path['testextra']['general_folder']}/model_classification_proportion"
+
+        # Get empty predict and testextra lists
+        predict_list = []
+        testextra_list = []
+
+        # Get model data
+        checkpoint = torch.load(fr"{model_path}")
+        testextra_model = BayesianNetwork(number_layers * 1 * 1, 3, number_layers).to(device)
+        testextra_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+
+        # Get initial total and correct
+        total = 0
+        correct = 0
+
+        testextra_model.eval()
+        for testextra_batchidx, (testextra_data, testextra_labels) in enumerate(self.testextraloader):
+            testextra_labels = testextra_labels.type(torch.LongTensor)
+            testextra_data, testextra_labels = testextra_data.to(device), testextra_labels.to(device)
+            outputs = testextra_model(testextra_data)
+
+            probabilities = F.softmax(outputs)
+            _, predicted = torch.max(probabilities.data, 1)
+
+            total += testextra_labels.size(0)
+            correct += torch.eq(predicted, testextra_labels).sum().item()
+
+            testextra_list.append(testextra_labels)
+            predict_list.append(predicted)
+
+        # Pull data out and put them into numpy
+        predict_list_np = [each_tensor.cpu().detach().numpy() for each_tensor in predict_list]
+        predict_list_np_flatten = np.concatenate(predict_list_np).ravel()
+        testextra_list_np = [each_tensor.cpu().detach().numpy() for each_tensor in testextra_list]
+        testextra_list_np_flatten = np.concatenate(testextra_list_np).ravel()
+
+        # Read out original raster
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['testextra']['general_folder']}/dem_input_domain.nc")
+
+        # Create folder to write file
+        Path(
+            fr"{testextra_folder}/prediction"
+        ).mkdir(parents=True, exist_ok=True)
+        # Write out file
+        prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
+        prediction_raster = xr.DataArray(
+            data=prediction_values[0],
+            dims=['y', 'x'],
+            coords={
+                'x': (['x'], ex_raster.x.values),
+                'y': (['y'], ex_raster.y.values)
+            },
+            attrs=ex_raster.attrs
+        )
+        prediction_raster.rio.write_crs("epsg:2193", inplace=True)
+        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.to_raster(
+            fr"{testextra_folder}/prediction/classification_proportion_prediction.nc",
+            dtype=np.float64
+        )
+
+        # Write out different file
+        different_values = predict_list_np_flatten - testextra_list_np_flatten
+        different_raster = xr.DataArray(
+            data=different_values[0],
+            dims=['y', 'x'],
+            coords={
+                'x': (['x'], ex_raster.x.values),
+                'y': (['y'], ex_raster.y.values)
+            },
+            attrs=ex_raster.attrs
+        )
+        different_raster.rio.write_crs("epsg:2193", inplace=True)
+        different_raster.rio.write_nodata(-9999)
+        different_raster.rio.to_raster(
+            fr"{testextra_folder}/prediction/different_classification_proportion_prediction.nc",
+            dtype=np.float64
+        )
+
+        # Produce confusion matrix
+        cfm = confusion_matrix(
+            testextra_list_np_flatten, predict_list_np_flatten,
+        )
+        cfm_pc = np.stack([(cfm[i, :] / np.sum(cfm[i, :])) for i in range(3)])
+        df_cfm_pc = pd.DataFrame(
+            cfm_pc,
+            index=[i for i in ['NO flood', 'MAYBE flood', 'YES flood']],
+            columns=['NO flood', 'MAYBE flood', 'YES flood']
+        )
+        group_counts = ['{0:0.0f}'.format(value) for value in cfm.flatten()]
+        calculate_percentages = np.concatenate([(cfm[i, :] / np.sum(cfm[i, :])) for i in range(3)])
+        group_percentages = ['{0:.2%}'.format(value) for value in calculate_percentages]
+        labels = [f'{v2}\n{v3}' for v2, v3 in zip(group_counts, group_percentages)]
+        labels = np.asarray(labels).reshape(3, 3)
+
+        # Draw confusion matrix
+        fig, ax = plt.subplots(figsize=(10, 7))
+
+        sns.heatmap(df_cfm_pc, annot=labels, cmap='rainbow', ax=ax, fmt='', cbar=False)
+        ax.set_xlabel('PREDICTED LABEL')
+        ax.set_ylabel('ACTUAL LABEL')
+        # Save fig
+        fig.savefig(
+            fr"{self.para_path['testextra']['general_folder']}/classification_confusion_matrix.jpg",
+            bbox_inches='tight', dpi=600
+        )
+
+        # Calculate other metrics
+        precision, recall, fscore, support = score(testextra_list_np_flatten, predict_list_np_flatten)
+
+        print('precision: {}'.format(precision))
+        print('recall: {}'.format(recall))
+        print('fscore: {}'.format(fscore))
+        print('support: {}'.format(support))
+
+
+    def testextra_proportion_regression_model(self,
+                                             model_path,
+                                             number_layers=10
+                                             ):
+
+        # Create path
+        Path(
+            fr"{self.para_path['testextra']['general_folder']}/model_regression_proportion"
+        ).mkdir(parents=True, exist_ok=True)
+        testextra_folder = fr"{self.para_path['testextra']['general_folder']}/model_regression_proportion"
+
+        # Get empty predict and testextra lists
+        predict_list = []
+        testextra_list = []
+
+        # Get model data
+        checkpoint = torch.load(fr"{model_path}")
+        testextra_model = MLP_BBB(number_layers, setseed=self.setseed).to(device)
+        testextra_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        testextra_model.eval()
+
+        for testextra_batchidx, (testextra_xdata, testextra_ydata) in enumerate(self.testextraloader):
+            testextra_xdata = testextra_xdata.to(device)
+            testextra_ydata = testextra_ydata.to(device)
+
+            # Get outputs
+            set_seed(self.setseed)
+            outputs_lst = [testextra_model.forward(testextra_xdata).data.cpu().numpy().squeeze(1) for _ in range(100)]
+
+            # Calculate mean
+            output_T = np.array(outputs_lst).T
+            output_mean = output_T.mean(axis=1)
+
+            testextra_list.append(testextra_ydata)
+            predict_list.append(output_mean)
+
+        # Read out original raster
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['testextra']['general_folder']}/dem_input_domain.nc")
+
+        # Get predicted values
+        predict_list_np_flatten = np.concatenate(predict_list).ravel()
+        predict_list_np_flatten[predict_list_np_flatten < 0] = 0
+        predict_list_np_flatten[predict_list_np_flatten > 100] = 0
+        prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
+
+        # Create folder to write out file
+        Path(
+            fr"{testextra_folder}/prediction"
+        ).mkdir(parents=True, exist_ok=True)
+        # Write out file
+        prediction_raster = xr.DataArray(
+            data=prediction_values[0],
+            dims=['y', 'x'],
+            coords={
+                'x': (['x'], ex_raster.x.values),
+                'y': (['y'], ex_raster.y.values)
+            },
+            attrs=ex_raster.attrs
+        )
+        prediction_raster.rio.write_crs("epsg:2193", inplace=True)
+        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.to_raster(
+            fr"{testextra_folder}/prediction/regression_proportion_prediction.nc",
+            dtype=np.float64
+        )
+
+    def testextra_sd_regression_model(self,
+                                      model_path,
+                                      number_layers=8
+                                      ):
+
+        # Create path
+        Path(
+            fr"{self.para_path['testextra']['general_folder']}/model_regression_sd"
+        ).mkdir(parents=True, exist_ok=True)
+        testextra_folder = fr"{self.para_path['testextra']['general_folder']}/model_regression_sd"
+
+        # Get empty predict and testextra lists
+        predict_list = []
+        testextra_list = []
+
+        # Get model data
+        checkpoint = torch.load(fr"{model_path}")
+        testextra_model = MLP_BBB(number_layers, setseed=self.setseed).to(device)
+        testextra_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        testextra_model.eval()
+
+        for testextra_batchidx, (testextra_xdata, testextra_ydata) in enumerate(self.testextraloader):
+            testextra_xdata = testextra_xdata.to(device)
+            testextra_ydata = testextra_ydata.to(device)
+
+            # Get outputs
+            set_seed(self.setseed)
+            outputs_lst = [testextra_model.forward(testextra_xdata).data.cpu().numpy().squeeze(1) for _ in range(100)]
+
+            # Calculate mean
+            output_T = np.array(outputs_lst).T
+            output_mean = output_T.mean(axis=1)
+
+            # Collect outputs
+            testextra_list.append(testextra_ydata)
+            predict_list.append(output_mean)
+
+        # Read out original raster
+        ex_raster = rxr.open_rasterio(fr"{self.para_path['testextra']['general_folder']}/dem_input_domain.nc")
+
+        # Get predicted values
+        predict_list_np_flatten = np.concatenate(predict_list).ravel() / 100
+        predict_list_np_flatten[predict_list_np_flatten < 0.01] = 0
+        prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
+
+        # Create folder to write out file
+        Path(
+            fr"{testextra_folder}/prediction"
+        ).mkdir(parents=True, exist_ok=True)
+        # Write out file
+        prediction_raster = xr.DataArray(
+            data=prediction_values[0],
+            dims=['y', 'x'],
+            coords={
+                'x': (['x'], ex_raster.x.values),
+                'y': (['y'], ex_raster.y.values[::-1])
+            },
+            attrs=ex_raster.attrs
+        )
+        prediction_raster.rio.write_crs("epsg:2193", inplace=True)
+        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.to_raster(
+            fr"{testextra_folder}/prediction/sd_regression_prediction.nc",
+            dtype=np.float64
+        )
 
 
 

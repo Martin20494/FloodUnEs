@@ -1,22 +1,12 @@
 # Pytorch packages
 import torch
 from torch.utils.data import DataLoader
-from torch.utils.data import WeightedRandomSampler
-
-# Visualisation packages
-import matplotlib.pyplot as plt
 
 # Data manipulation packages
 import numpy as np
 
-# Sklearn packages
-from sklearn.model_selection import train_test_split
-
 # Random package
 import random
-
-# Oversampling package
-import resreg
 
 # Path
 import os
@@ -39,13 +29,13 @@ def set_seed(seed: int = 42) -> None:
     # Set a fixed value for the hash seed
     os.environ["PYTHONHASHSEED"] = str(seed)
 
-class pixelDatasetGenerationEstimate():
+class pixelDatasetGenerationTestExtra():
 
     def __init__(self, x_flatten_channel, setseed=2):
         self.x_flatten_channel = x_flatten_channel
         self.setseed = setseed
 
-    def pixel_dataset_generation_estimate(self):
+    def pixel_dataset_generation_testextra(self):
 
         # FOR X ==================================
         # Reshape big arrays into small arrays - x
@@ -95,102 +85,140 @@ class pixelDatasetGenerationEstimate():
         switch_batches_channels_array_x = np.stack(switch_batches_channels_list_x)
         switch_batches_channels_array_x = switch_batches_channels_array_x.astype('float64')
 
-        return switch_batches_channels_array_x
+        # FOR Y ===================================
+        # Reshape big arrays into small arrays - y
+        reshape_into_small_batches_list_y = []
+
+        small_array_y = blockshaped(
+            np.stack(np.split(self.y_flatten_channel, self.y_flatten_channel.shape[0] / small_array_size)), 1,
+            small_array_size)
+        reshape_into_small_batches_list_y.append(small_array_y)
+
+        reshape_into_small_batches_array_y = np.stack(reshape_into_small_batches_list_y)
+
+        # -----------------------------------
+        # Reshape to put the batches in front of the channels - y train
+        switch_batches_channels_list_y = []
+
+        for i in range(reshape_into_small_batches_array_y.shape[1]):
+            one_batch_all_channels_y = np.vstack(
+                [
+                    reshape_into_small_batches_array_y[n][i].reshape(-1, small_array_size) for n in
+                    range(reshape_into_small_batches_array_y.shape[0])
+                ]
+            )
+            switch_batches_channels_list_y.append(one_batch_all_channels_y)
+
+        switch_batches_channels_array_y = np.stack(switch_batches_channels_list_y)
+
+        # ---------------------------------
+        # Reshape one more time - y train (reduce dimension)
+        switch_batches_channels_array_y = switch_batches_channels_array_y.flatten()
+        switch_batches_channels_array_y = switch_batches_channels_array_y.astype('float64')
+
+        # FOR DATASET ============================
+        datasets = [
+            switch_batches_channels_array_x,
+            switch_batches_channels_array_y
+        ]
+
+        return datasets
 
 
-class PixelEstimate():
+class PixelTestExtra():
 
-    def __init__(self, x):
+    def __init__(self, xy):
         # data loading
-        self.x = torch.Tensor(x)
-        self.n_samples = x.shape[0]
+        self.x = torch.Tensor(xy[0])
+        self.y = torch.Tensor(xy[1])
+        self.n_samples = xy[0].shape[0]
 
     def __getitem__(self, index):
-        return self.x[index]
+        return self.x[index], self.y[index]
 
     def __len__(self):
         return self.n_samples
 
 
-class dataPreparationEstimate:
+class dataPreparationTestExtra:
     def __init__(self, parameter_path, setseed=2):
 
         self.para_path = parameter_path
         self.setseed = setseed
 
 
-    def estimate_data(self, type):
+    def testextra_data(self, type):
 
         if type == 'classification_proportion':
 
-            # Get estimate collection
-            estimate_collection = dataCollection(
-                self.para_path['estimate']['general_folder'],
-                self.para_path['estimate']['geometry_domain_list'],
-                self.para_path['estimate']['path_elev'],
-                self.para_path['estimate']['path_wd'],
-                self.para_path['estimate']['path_wse'],
-                self.para_path['estimate']['path_proportion'],
-                self.para_path['estimate']['path_manning'],
-                self.para_path['estimate']['path_roughness'],
+            # Get testextra collection
+            testextra_collection = dataCollection(
+                self.para_path['testextra']['general_folder'],
+                self.para_path['testextra']['geometry_domain_list'],
+                self.para_path['testextra']['path_elev'],
+                self.para_path['testextra']['path_wd'],
+                self.para_path['testextra']['path_wse'],
+                self.para_path['testextra']['path_proportion'],
+                self.para_path['testextra']['path_manning'],
+                self.para_path['testextra']['path_roughness'],
                 self.para_path['train']['path_sd']
             )
 
         elif type == 'regression_proportion':
 
-            # Get estimate collection
-            estimate_collection = dataCollection(
-                self.para_path['estimate']['general_folder'],
-                self.para_path['estimate']['geometry_domain_list'],
-                self.para_path['estimate']['path_elev'],
-                self.para_path['estimate']['path_wd'],
-                self.para_path['estimate']['path_wse'],
-                self.para_path['estimate']['path_proportion'],
-                self.para_path['estimate']['path_manning'],
-                self.para_path['estimate']['path_roughness'],
+            # Get testextra collection
+            testextra_collection = dataCollection(
+                self.para_path['testextra']['general_folder'],
+                self.para_path['testextra']['geometry_domain_list'],
+                self.para_path['testextra']['path_elev'],
+                self.para_path['testextra']['path_wd'],
+                self.para_path['testextra']['path_wse'],
+                self.para_path['testextra']['path_proportion'],
+                self.para_path['testextra']['path_manning'],
+                self.para_path['testextra']['path_roughness'],
                 self.para_path['train']['path_sd']
             )
 
         else: # for regression_sd
 
-            # Get estimate collection
-            estimate_collection = dataCollection(
-                self.para_path['estimate']['general_folder'],
-                self.para_path['estimate']['geometry_domain_list'],
-                self.para_path['estimate']['path_elev'],
-                self.para_path['estimate']['path_wd'],
-                self.para_path['estimate']['path_wse'],
-                self.para_path['estimate']['path_proportion'],
-                self.para_path['estimate']['path_manning'],
-                self.para_path['estimate']['path_roughness'],
+            # Get testextra collection
+            testextra_collection = dataCollection(
+                self.para_path['testextra']['general_folder'],
+                self.para_path['testextra']['geometry_domain_list'],
+                self.para_path['testextra']['path_elev'],
+                self.para_path['testextra']['path_wd'],
+                self.para_path['testextra']['path_wse'],
+                self.para_path['testextra']['path_proportion'],
+                self.para_path['testextra']['path_manning'],
+                self.para_path['testextra']['path_roughness'],
                 self.para_path['train']['path_sd']
             )
 
 
         # Get dataframe
-        estimate_df = estimate_collection.loadpara_into_dataframe_estimate(
+        testextra_df = testextra_collection.loadpara_into_dataframe_testextra(
             type=type,
-            name_csv='estimate'
+            name_csv='testextra'
         )
 
         # Write out for checking
-        estimate_df.to_csv(
-            fr"{self.para_path['estimate']['general_folder']}/estimate_{type}_df.csv",
+        testextra_df.to_csv(
+            fr"{self.para_path['testextra']['general_folder']}/testextra_{type}_df.csv",
             index=False)
 
         # Flatten out values
-        x_estimate_flatten_channel = estimate_df.loc[:, list(estimate_df.columns[2:])].to_numpy().T
+        x_testextra_flatten_channel = testextra_df.loc[:, list(testextra_df.columns[2:])].to_numpy().T
 
         # Get pixels values across simulations
-        estimate_pixel_dataset = pixelDatasetGenerationEstimate(
-            x_estimate_flatten_channel,
+        testextra_pixel_dataset = pixelDatasetGenerationTestExtra(
+            x_testextra_flatten_channel,
             setseed=self.setseed
         )
 
-        return estimate_pixel_dataset
+        return testextra_pixel_dataset
 
 
-    def pixel_dataloader_estimate(self,
+    def pixel_dataloader_testextra(self,
                                   type,
                                   batchsize=2048,
                                   num_workers=1):
@@ -198,21 +226,21 @@ class dataPreparationEstimate:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         kwargs = {'num_workers': num_workers, 'pin_memory': True} if device == 'cuda' else {}
 
-        # Call estimate pixel dataset
-        estimate_pixel_dataset = self.estimate_data(type)
+        # Call testextra pixel dataset
+        testextra_pixel_dataset = self.testextra_data(type)
 
         set_seed(self.setseed)
-        # FOR ESTIMATE
-        estimateloader = DataLoader(
-            dataset=PixelEstimate(
-                estimate_pixel_dataset.pixel_dataset_generation_estimate()
+        # FOR testextra
+        testextraloader = DataLoader(
+            dataset=PixelTestExtra(
+                testextra_pixel_dataset.pixel_dataset_generation_testextra()
             ),
             batch_size=batchsize,
             shuffle=False,
             **kwargs
         )
 
-        return estimateloader
+        return testextraloader
 
 
 
