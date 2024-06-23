@@ -534,7 +534,7 @@ class dataPreparation:
 
             # Plot two-sided relevance values (left and right tails)
             plt.scatter(y_training_002, relevance_middle_002, s=.1)
-            # plt.axhline(.48, linestyle='--', color='black')
+            plt.axhline(.48, linestyle='--', color='black')
             plt.ylabel('Relevance')
             plt.xlabel('Target')
             plt.title('Rare domain from both tails')
