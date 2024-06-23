@@ -488,9 +488,9 @@ class dataPreparation:
                 linestyle='--',
                 color='black'
             )
-            ax1.ylabel('Relevance')
-            ax1.xlabel('Target')
-            ax1.title('Rare domain from both tails')
+            ax1.set_ylabel('Relevance')
+            ax1.set_xlabel('Target')
+            ax1.set_title('Rare domain from both tails')
             ax1.show()
             # Save fig
             fig.savefig(
@@ -537,9 +537,9 @@ class dataPreparation:
             fig, ax3 = plt.subplots(figsize=(6, 6))
             ax3.scatter(y_training_002, relevance_middle_002, s=.1)
             ax3.axhline(.48, linestyle='--', color='black')
-            ax3.ylabel('Relevance')
-            ax3.xlabel('Target')
-            ax3.title('Rare domain from both tails')
+            ax3.set_ylabel('Relevance')
+            ax3.set_xlabel('Target')
+            ax3.set_title('Rare domain from both tails')
             ax3.show()
             # Save fig
             fig.savefig(
