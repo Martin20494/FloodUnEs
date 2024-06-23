@@ -476,7 +476,7 @@ class dataPreparation:
 
             # Original
             fig, ax0 = plt.subplots(figsize=(6, 6))
-            ax0.hist(y_training_001, bins=100)
+            ax0.hist(y_training_001, bins=500)
             # Save fig
             fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/original_histogram_proportion.jpg",
@@ -525,7 +525,7 @@ class dataPreparation:
 
             # Plot
             fig, ax2 = plt.subplots(figsize=(6, 6))
-            ax2.hist(y_train_flatten_channel_resampled_NO_0_001, bins=100)
+            ax2.hist(y_train_flatten_channel_resampled_NO_0_001, bins=500)
             # Save fig
             fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/resample_proportion_first_level.jpg",
@@ -573,7 +573,7 @@ class dataPreparation:
 
             # Plot
             fig, ax4 = plt.subplots(figsize=(6, 6))
-            ax4.hist(y_train_flatten_channel_resampled_002, bins=100)
+            ax4.hist(y_train_flatten_channel_resampled_002, bins=500)
             # Save fig
             fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/resample_proportion_second_level.jpg",
@@ -595,7 +595,7 @@ class dataPreparation:
 
             # FULL --------
             fig, ax5 = plt.subplots(figsize=(6, 6))
-            ax5.hist(y_train_flatten_channel_full, bins=100)
+            ax5.hist(y_train_flatten_channel_full, bins=500)
             # Save fig
             fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/resample_proportion_full.jpg",
