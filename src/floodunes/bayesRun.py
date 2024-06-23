@@ -231,7 +231,7 @@ class runBayesClassification():
             val_loss_total /= len(self.valloader.dataset)
 
             # Save model
-            if epoch >= 0: #2000
+            if epoch >= 2000:
                 torch.save({
                     'epoch': epoch,
                     'train_loss_total': train_loss_total,
@@ -383,7 +383,7 @@ class runBayesClassification():
             train_loss_total /= len(self.trainloader.dataset)
             val_loss_total /= len(self.valloader.dataset)
 
-            if epoch >= checkpoint['epoch'] + 0: # +1000
+            if epoch >= checkpoint['epoch'] + 1000:
                 torch.save({
                     'epoch': epoch,
                     'train_loss_total': train_loss_total,
@@ -643,7 +643,7 @@ class runBayesRegressionProportion():
 
                 min_val_loss = val_loss_total
 
-                if epoch >= 0: # 100
+                if epoch >= 100:
                     torch.save({
                         'epoch': epoch,
                         'train_loss_total': train_loss_total,
@@ -721,7 +721,7 @@ class runBayesRegressionProportion():
                       ''.format(min_val_loss, val_loss_total))
 
                 min_val_loss = val_loss_total
-                if epoch >= checkpoint['epoch'] + 0: # +100
+                if epoch >= checkpoint['epoch'] + 100: # +100
                     torch.save({
                         'epoch': epoch,
                         'train_loss_total': train_loss_total,
@@ -915,7 +915,7 @@ class runBayesRegressionSD():
                       ''.format(min_val_loss, val_loss_total))
 
                 min_val_loss = val_loss_total
-                if epoch >= 0: # 100
+                if epoch >= 100: # 100
                     torch.save({
                         'epoch': epoch,
                         'train_loss_total': train_loss_total,
@@ -992,7 +992,7 @@ class runBayesRegressionSD():
                       ''.format(min_val_loss, val_loss_total))
 
                 min_val_loss = val_loss_total
-                if epoch >= checkpoint['epoch'] + 0: # + 100
+                if epoch >= checkpoint['epoch'] + 100: # + 100
                     torch.save({
                         'epoch': epoch,
                         'train_loss_total': train_loss_total,
