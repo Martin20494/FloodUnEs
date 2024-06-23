@@ -1061,12 +1061,12 @@ class runBayesRegressionSD():
             dims=['y', 'x'],
             coords={
                 'x': (['x'], ex_raster.x.values),
-                'y': (['y'], ex_raster.y.values[::-1])
+                'y': (['y'], ex_raster.y.values)
             },
             attrs=ex_raster.attrs
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
-        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.write_nodata(0)
         prediction_raster.rio.to_raster(
             fr"{self.test_folder}/prediction/sd_regression_prediction.nc",
             dtype=np.float64
@@ -1346,7 +1346,7 @@ class runTestExtra():
             dims=['y', 'x'],
             coords={
                 'x': (['x'], ex_raster.x.values),
-                'y': (['y'], ex_raster.y.values[::-1])
+                'y': (['y'], ex_raster.y.values)
             },
             attrs=ex_raster.attrs
         )
@@ -1429,7 +1429,7 @@ class runEstimation():
             dims=['y', 'x'],
             coords={
                 'x': (['x'], ex_raster.x.values),
-                'y': (['y'], ex_raster.y.values[::-1])
+                'y': (['y'], ex_raster.y.values)
             },
             attrs=ex_raster.attrs
         )
@@ -1483,7 +1483,7 @@ class runEstimation():
             dims=['y', 'x'],
             coords={
                 'x': (['x'], ex_raster.x.values),
-                'y': (['y'], ex_raster.y.values[::-1])
+                'y': (['y'], ex_raster.y.values)
             },
             attrs=ex_raster.attrs
         )
@@ -1536,7 +1536,7 @@ class runEstimation():
             dims=['y', 'x'],
             coords={
                 'x': (['x'], ex_raster.x.values),
-                'y': (['y'], ex_raster.y.values[::-1])
+                'y': (['y'], ex_raster.y.values)
             },
             attrs=ex_raster.attrs
         )
