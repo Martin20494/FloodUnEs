@@ -481,19 +481,19 @@ class dataPreparation:
             ) # 1 is 100% flood, 99 is not 100% flood
 
             # Plot two-sided relevance values (left and right tails)
-            plt.scatter(y_training_001, relevance_middle_001, s=.1)
-            plt.axhline(
+            fig, ax1 = plt.subplots(figsize=(6, 6))
+            ax1.scatter(y_training_001, relevance_middle_001, s=.1)
+            ax1.axhline(
                 self.para_path['train']['resample_proportion']['filters_num_001'],
                 linestyle='--',
                 color='black'
             )
-            plt.ylabel('Relevance')
-            plt.xlabel('Target')
-            plt.title('Rare domain from both tails')
-            plt.show()
-            plt.close()
+            ax1.ylabel('Relevance')
+            ax1.xlabel('Target')
+            ax1.title('Rare domain from both tails')
+            ax1.show()
             # Save fig
-            plt.savefig(
+            fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/relevance_proportion_first_level.jpg",
                 bbox_inches='tight', dpi=600
             )
@@ -515,9 +515,10 @@ class dataPreparation:
             x_train_flatten_channel_resampled_NO_0_001 = x_train_flatten_channel_resampled_001[indices_NO_0]
 
             # Plot
-            plt.hist(y_train_flatten_channel_resampled_NO_0_001, bins=100)
+            fig, ax2 = plt.subplots(figsize=(6, 6))
+            ax2.hist(y_train_flatten_channel_resampled_NO_0_001, bins=100)
             # Save fig
-            plt.savefig(
+            fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/resample_proportion_first_level.jpg",
                 bbox_inches='tight', dpi=600
             )
@@ -533,15 +534,15 @@ class dataPreparation:
             )
 
             # Plot two-sided relevance values (left and right tails)
-            plt.scatter(y_training_002, relevance_middle_002, s=.1)
-            plt.axhline(.48, linestyle='--', color='black')
-            plt.ylabel('Relevance')
-            plt.xlabel('Target')
-            plt.title('Rare domain from both tails')
-            plt.show()
-            plt.close()
+            fig, ax3 = plt.subplots(figsize=(6, 6))
+            ax3.scatter(y_training_002, relevance_middle_002, s=.1)
+            ax3.axhline(.48, linestyle='--', color='black')
+            ax3.ylabel('Relevance')
+            ax3.xlabel('Target')
+            ax3.title('Rare domain from both tails')
+            ax3.show()
             # Save fig
-            plt.savefig(
+            fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/relevance_proportion_second_level.jpg",
                 bbox_inches='tight', dpi=600
             )
@@ -559,9 +560,10 @@ class dataPreparation:
             )
 
             # Plot
-            plt.hist(y_train_flatten_channel_resampled_002, bins=100)
+            fig, ax4 = plt.subplots(figsize=(6, 6))
+            ax4.hist(y_train_flatten_channel_resampled_002, bins=100)
             # Save fig
-            plt.savefig(
+            fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/resample_proportion_second_level.jpg",
                 bbox_inches='tight', dpi=600
             )
@@ -580,9 +582,10 @@ class dataPreparation:
 
 
             # FULL --------
-            plt.hist(y_train_flatten_channel_full, bins=100)
+            fig, ax5 = plt.subplots(figsize=(6, 6))
+            ax5.hist(y_train_flatten_channel_full, bins=100)
             # Save fig
-            plt.savefig(
+            fig.savefig(
                 fr"{self.para_path['train']['general_folder']}/resample_proportion_full.jpg",
                 bbox_inches='tight', dpi=600
             )
