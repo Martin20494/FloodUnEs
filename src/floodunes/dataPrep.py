@@ -473,6 +473,16 @@ class dataPreparation:
             # Get variables
             x_training_001 = x_train_flatten_channel.transpose().copy()
             y_training_001 = y_train_flatten_channel.copy()
+
+            # Original
+            fig, ax0 = plt.subplots(figsize=(6, 6))
+            ax0.hist(y_training_001, bins=100)
+            # Save fig
+            fig.savefig(
+                fr"{self.para_path['train']['general_folder']}/original_histogram.jpg",
+                bbox_inches='tight', dpi=600
+            )
+
             # Get resampled relevance
             relevance_middle_001 = resreg.sigmoid_relevance(
                 y_training_001,
