@@ -1191,7 +1191,7 @@ class dataCollection:
         else:
 
             # Call out each para
-            elev_IN = self.dem_input() # For creating richdem
+            elev_IN = self.dem_input() # For creating richdemte
             # Depth includes 3 columns - x, y, depth - so the next para will be counted from 3
             depth_IN = self.depth_input(sd=True)
             # 3. Slope
