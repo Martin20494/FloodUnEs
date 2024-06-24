@@ -162,7 +162,7 @@ class dataPreparationTestExtra:
                 self.para_path['testextra']['path_proportion'],
                 self.para_path['testextra']['path_manning'],
                 self.para_path['testextra']['path_roughness'],
-                self.para_path['train']['path_sd']
+                self.para_path['testextra']['path_sd']
             )
 
         elif type == 'regression_proportion':
@@ -177,7 +177,7 @@ class dataPreparationTestExtra:
                 self.para_path['testextra']['path_proportion'],
                 self.para_path['testextra']['path_manning'],
                 self.para_path['testextra']['path_roughness'],
-                self.para_path['train']['path_sd']
+                self.para_path['testextra']['path_sd']
             )
 
         else: # for regression_sd
@@ -192,7 +192,7 @@ class dataPreparationTestExtra:
                 self.para_path['testextra']['path_proportion'],
                 self.para_path['testextra']['path_manning'],
                 self.para_path['testextra']['path_roughness'],
-                self.para_path['train']['path_sd']
+                self.para_path['testextra']['path_sd']
             )
 
 
