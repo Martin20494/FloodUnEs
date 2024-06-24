@@ -1099,6 +1099,13 @@ class runTestExtra():
         testextraloader = data_preparation.pixel_dataloader_testextra(
             type=type, batchsize=batchsize, num_workers=num_workers
         )
+
+        for i, (train, label) in enumerate(testextraloader):
+            print("i: ", i)
+            print("train: ", train.shape)
+            print("label: ", label.shape)
+            print("---------------")
+
         self.testextraloader = testextraloader
 
 
