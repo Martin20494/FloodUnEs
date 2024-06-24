@@ -474,7 +474,7 @@ class runBayesClassification():
             attrs=ex_raster.attrs
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
-        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.write_nodata(0)
         prediction_raster.rio.to_raster(
             fr"{self.test_folder}/prediction/classification_proportion_prediction.nc",
             dtype=np.float64
@@ -797,7 +797,7 @@ class runBayesRegressionProportion():
             attrs=ex_raster.attrs
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
-        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.write_nodata(0)
         prediction_raster.rio.to_raster(
             fr"{self.test_folder}/prediction/regression_proportion_prediction.nc",
             dtype=np.float64
@@ -1078,6 +1078,7 @@ class runTestExtra():
 
     def __init__(self,
                  parameter_path,
+                 type,
                  batchsize=2048,
                  setseed=2,
                  num_workers=1
@@ -1164,7 +1165,7 @@ class runTestExtra():
             attrs=ex_raster.attrs
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
-        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.write_nodata(0)
         prediction_raster.rio.to_raster(
             fr"{testextra_folder}/prediction/classification_proportion_prediction.nc",
             dtype=np.float64
@@ -1285,7 +1286,7 @@ class runTestExtra():
             attrs=ex_raster.attrs
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
-        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.write_nodata(0)
         prediction_raster.rio.to_raster(
             fr"{testextra_folder}/prediction/regression_proportion_prediction.nc",
             dtype=np.float64
@@ -1351,7 +1352,7 @@ class runTestExtra():
             attrs=ex_raster.attrs
         )
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
-        prediction_raster.rio.write_nodata(-9999)
+        prediction_raster.rio.write_nodata(0)
         prediction_raster.rio.to_raster(
             fr"{testextra_folder}/prediction/sd_regression_prediction.nc",
             dtype=np.float64
@@ -1434,7 +1435,7 @@ class runEstimation():
             attrs=ex_raster.attrs
         )
         estimate_raster.rio.write_crs("epsg:2193", inplace=True)
-        estimate_raster.rio.write_nodata(-9999)
+        estimate_raster.rio.write_nodata(0)
         estimate_raster.rio.to_raster(fr"{self.estimate_folder}/classification_proportion_results.nc")
 
 
@@ -1488,7 +1489,7 @@ class runEstimation():
             attrs=ex_raster.attrs
         )
         estimate_raster.rio.write_crs("epsg:2193", inplace=True)
-        estimate_raster.rio.write_nodata(-9999)
+        estimate_raster.rio.write_nodata(0)
         estimate_raster.rio.to_raster(
             fr"{self.estimate_folder}/regression_proportion_results.nc"
         )
@@ -1541,7 +1542,7 @@ class runEstimation():
             attrs=ex_raster.attrs
         )
         estimate_raster.rio.write_crs("epsg:2193", inplace=True)
-        estimate_raster.rio.write_nodata(-9999)
+        estimate_raster.rio.write_nodata(0)
         estimate_raster.rio.to_raster(
             fr"{self.estimate_folder}/regression_sd_results.nc",
             dtype=np.float64

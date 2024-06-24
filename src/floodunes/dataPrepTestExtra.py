@@ -31,8 +31,9 @@ def set_seed(seed: int = 42) -> None:
 
 class pixelDatasetGenerationTestExtra():
 
-    def __init__(self, x_flatten_channel, setseed=2):
+    def __init__(self, x_flatten_channel, y_flatten_channel, setseed=2):
         self.x_flatten_channel = x_flatten_channel
+        self.y_flatten_channel = y_flatten_channel
         self.setseed = setseed
 
     def pixel_dataset_generation_testextra(self):
@@ -208,10 +209,11 @@ class dataPreparationTestExtra:
 
         # Flatten out values
         x_testextra_flatten_channel = testextra_df.loc[:, list(testextra_df.columns[2:])].to_numpy().T
+        y_testextra_flatten_channel = testextra_df.loc[:, testextra_df.columns[-1]].to_numpy().T
 
         # Get pixels values across simulations
         testextra_pixel_dataset = pixelDatasetGenerationTestExtra(
-            x_testextra_flatten_channel,
+            x_testextra_flatten_channel, y_testextra_flatten_channel,
             setseed=self.setseed
         )
 
