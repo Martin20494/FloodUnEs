@@ -208,7 +208,8 @@ class dataPreparationTestExtra:
             index=False)
 
         # Flatten out values
-        x_testextra_flatten_channel = testextra_df.loc[:, list(testextra_df.columns[2:])].to_numpy().T
+        x_testextra_flatten_channel = testextra_df.loc[:, 
+                                      list(testextra_df.columns[2:(len(testextra_df.columns)-3)])].to_numpy().T
         y_testextra_flatten_channel = testextra_df.loc[:, testextra_df.columns[-1]].to_numpy().T
 
         # Get pixels values across simulations

@@ -184,7 +184,7 @@ class dataCollection:
             depth_dict = {
                 "x": elev_arr[:, 0],
                 "y": elev_arr[:, 1],
-                "elev": self.wd_domain.values.flatten()
+                "depth": self.wd_domain.values.flatten()
             }
 
             # Convert into dataframe
