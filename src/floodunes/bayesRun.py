@@ -232,7 +232,7 @@ class runBayesClassification():
             val_loss_total /= len(self.valloader.dataset)
 
             # Save model
-            if epoch >= 2000:
+            if epoch >= 1000:
                 torch.save({
                     'epoch': epoch,
                     'train_loss_total': train_loss_total,
@@ -384,7 +384,7 @@ class runBayesClassification():
             train_loss_total /= len(self.trainloader.dataset)
             val_loss_total /= len(self.valloader.dataset)
 
-            if epoch >= checkpoint['epoch'] + 1000:
+            if epoch >= checkpoint['epoch'] + 500:
                 torch.save({
                     'epoch': epoch,
                     'train_loss_total': train_loss_total,
