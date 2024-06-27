@@ -232,7 +232,7 @@ class runBayesClassification():
             val_loss_total /= len(self.valloader.dataset)
 
             # Save model
-            if epoch >= 1000:
+            if epoch >= 100:
                 torch.save({
                     'epoch': epoch,
                     'train_loss_total': train_loss_total,
@@ -384,7 +384,7 @@ class runBayesClassification():
             train_loss_total /= len(self.trainloader.dataset)
             val_loss_total /= len(self.valloader.dataset)
 
-            if epoch >= checkpoint['epoch'] + 500:
+            if epoch >= checkpoint['epoch'] + 100:
                 torch.save({
                     'epoch': epoch,
                     'train_loss_total': train_loss_total,
@@ -1048,7 +1048,7 @@ class runBayesRegressionSD():
 
         # Get predicted values
         predict_list_np_flatten = np.concatenate(predict_list).ravel() / 100
-        predict_list_np_flatten[predict_list_np_flatten < 0.01] = 0
+        predict_list_np_flatten[predict_list_np_flatten < 0] = 0
         prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
 
         # Create folder to write out file
@@ -1341,7 +1341,7 @@ class runTestExtra():
 
         # Get predicted values
         predict_list_np_flatten = np.concatenate(predict_list).ravel() / 100
-        predict_list_np_flatten[predict_list_np_flatten < 0.01] = 0
+        predict_list_np_flatten[predict_list_np_flatten < 0] = 0
         prediction_values = predict_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
 
         # Create folder to write out file
@@ -1535,7 +1535,7 @@ class runEstimation():
 
         # Get estimated values
         estimate_list_np_flatten = np.concatenate(estimate_list).ravel() / 100
-        estimate_list_np_flatten[estimate_list_np_flatten < 0.01] = 0
+        estimate_list_np_flatten[estimate_list_np_flatten < 0] = 0
         estimate_values = estimate_list_np_flatten.reshape(-1, ex_raster.shape[1], ex_raster.shape[2])
 
         # Write out file
