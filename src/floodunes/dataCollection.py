@@ -545,19 +545,22 @@ class dataCollection:
         return flow_accumulation_reshape.flatten()
 
 
-    def proportionlabel_train_input(self):
+    def proportionlabel_train_input(self, fortrain=True):
 
         if self.path_proportion != None:
 
             # Get proportion values
             proportion_label = self.proportion_domain.values.copy()
 
-            # Convert values < 100 to 1
-            proportion_label[(proportion_label>0) & (proportion_label<100)] = 1
-            # Convert values = 100 to 2
-            proportion_label[proportion_label==100] = 2
-            # Convert values -9999 to 0
-            proportion_label[proportion_label<0] = 0
+            if fortrain == True:
+                # Convert values < 100 to 1
+                proportion_label[(proportion_label>0) & (proportion_label<100)] = 1
+                # Convert values = 100 to 2
+                proportion_label[proportion_label==100] = 2
+                # Convert values -9999 to 0
+                proportion_label[proportion_label<0] = 0
+            else:
+                pass
 
             # Create array
             proportion_label_arr = xr.DataArray(
@@ -962,7 +965,10 @@ class dataCollection:
         # 8. Flow accumulation
         flowaccumulation_IN = self.flowaccumulation_input()
         # 9. Proportion label
-        proportionlabel_IN = self.proportionlabel_train_input()
+        if name_csv == 'train':
+            proportionlabel_IN = self.proportionlabel_train_input()
+        else:
+            proportionlabel_IN = self.proportionlabel_train_input(fortrain=False)
         # 10. Proportion proximity
         proportionproximity_IN = self.proportionproximity_input()
         # 11. Proximity difference
@@ -1151,7 +1157,10 @@ class dataCollection:
             # 8. Flow accumulation
             flowaccumulation_IN = self.flowaccumulation_input()
             # 9. Proportion label
-            proportionlabel_IN = self.proportionlabel_train_input()
+            if name_csv == 'train':
+                proportionlabel_IN = self.proportionlabel_train_input()
+            else:
+                proportionlabel_IN = self.proportionlabel_train_input(fortrain=False)
             # 10. Proportion proximity
             proportionproximity_IN = self.proportionproximity_input()
             # 11. Proximity difference
@@ -1323,7 +1332,10 @@ class dataCollection:
             # 8. Flow accumulation
             flowaccumulation_IN = self.flowaccumulation_input()
             # 9. Proportion label
-            proportionlabel_IN = self.proportionlabel_train_input()
+            if name_csv == 'train':
+                proportionlabel_IN = self.proportionlabel_train_input()
+            else:
+                proportionlabel_IN = self.proportionlabel_train_input(fortrain=False)
             # 10. Proportion proximity
             proportionproximity_IN = self.proportionproximity_input()
             # 11. Proximity difference
