@@ -91,11 +91,11 @@ def remove_values_outside_floodplain(
 ):
 
     # Get rasters
-    prediction = rxr.open_rasterio(
-        fr"{path_to_prediction}"
-    )
     proximity = rxr.open_rasterio(
         fr"{path_to_floodproximity}"
+    )
+    prediction = rxr.open_rasterio(
+        fr"{path_to_prediction}"
     )
 
     # Remove values
@@ -373,7 +373,8 @@ def confusion_matrix_plot(
 class resultCalculation():
 
     def __init__(self,
-                 result_path
+                 result_path,
+                 filter_value_outside=20
                  ):
 
         # Set up parameters for getting data
@@ -387,6 +388,14 @@ class resultCalculation():
         self.result_folder = fr"{self.main_path}/results/{self.result_path['type_prediction']}/{self.result_path['version']}"
         Path(self.result_folder).mkdir(parents=True, exist_ok=True)
 
+        # Remove outside of floodplain area
+        remove_values_outside_floodplain(
+            fr"{self.main_path}/{self.result_path['type_test']}/floodproximity_input_domain.nc"
+            fr"{self.main_path}/{self.result_path['type_test']}/model_{self.result_path['type_prediction']}/prediction/{self.result_path['name_prediction_file']}",
+            fr"{self.result_folder}/{self.result_path['type_prediction']}_removeoutside.nc",
+            filter_value_outside
+        )
+
 
 
     def resultProportion(
@@ -394,26 +403,10 @@ class resultCalculation():
         zoom_coord_forcomparisonplot,
         inset_axis_position_forcomparisonplot,
         zoom_list_forhistogram=None,
-        filter_value_outside=20,
     ):
 
         # Get save path
         save_path = fr"{self.result_folder}"
-
-        print(fr"{self.main_path}/{self.result_path['type_test']}/floodproximity_input_domain.nc")
-        print()
-        print(fr"{self.main_path}/{self.result_path['type_test']}/model_{self.result_path['type_prediction']}/prediction/{self.result_path['name_prediction_file']}",)
-        print()
-        print(fr"{save_path}/{self.result_path['type_prediction']}_removeoutside.nc")
-        print()
-
-        # Remove outside of floodplain area
-        remove_values_outside_floodplain(
-            fr"{self.main_path}/{self.result_path['type_test']}/floodproximity_input_domain.nc"
-            fr"{self.main_path}/{self.result_path['type_test']}/model_{self.result_path['type_prediction']}/prediction/{self.result_path['name_prediction_file']}",
-            fr"{save_path}/{self.result_path['type_prediction']}_removeoutside.nc",
-            filter_value_outside
-        )
 
         # GET ALL NECESSARY PATHS
         # Get actual data
@@ -634,16 +627,7 @@ class resultCalculation():
         zoom_coord_forcomparisonplot,
         inset_axis_position_forcomparisonplot,
         zoom_list_forhistogram=None,
-        filter_value_outside=20
     ):
-
-        # Remove outside of floodplain area
-        remove_values_outside_floodplain(
-            fr"{self.main_path}/{self.result_path['type_test']}/floodproximity_input_domain.nc"
-            fr"{self.main_path}/{self.result_path['type_test']}/model_{self.result_path['type_prediction']}/prediction/{self.result_path['name_prediction_file']}",
-            fr"{self.result_folder}/{self.result_path['type_prediction']}_removeoutside.nc",
-            filter_value_outside
-        )
 
         # Get save path
         save_path = fr"{self.result_folder}"
