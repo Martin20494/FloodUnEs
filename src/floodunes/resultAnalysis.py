@@ -105,7 +105,7 @@ def remove_values_outside_floodplain(
 
     # Write out
     new_prediction.rio.to_raster(
-        fr"{path_to_foldersavingthefile}/regression_preoportion_prediction_removeoutside.nc"
+        fr"{path_to_foldersavingthefile}"
     )
 
 def comparison_plot(
@@ -401,8 +401,8 @@ class resultCalculation():
         # Remove outside of floodplain area
         remove_values_outside_floodplain(
             fr"{self.main_path}/{self.result_path['type_test']}/floodproximity_input_domain.nc"
-            fr"{self.main_path}/{self.result_path['type_test']}/model_regression_{self.result_path['type_prediction']}/prediction/{self.result_path['name_prediction_file']}",
-            fr"{self.result_folder}/regression_{self.result_path['type_prediction']}_removeoutside.nc",
+            fr"{self.main_path}/{self.result_path['type_test']}/model_{self.result_path['type_prediction']}/prediction/{self.result_path['name_prediction_file']}",
+            fr"{self.result_folder}/{self.result_path['type_prediction']}_removeoutside.nc",
             filter_value_outside
         )
 
@@ -418,7 +418,7 @@ class resultCalculation():
             fr"{save_path}/actual_proportion.tiff")  # Convert to tiff to remove river and sea
         actual_proportion_path_new = fr"{save_path}/actual_proportion.tiff"
         # Get predicted data
-        predicted_proportion_path = fr"{save_path}/regression_{self.result_path['type_prediction']}_removeoutside.nc"
+        predicted_proportion_path = fr"{save_path}/{self.result_path['type_prediction']}_removeoutside.nc"
         predicted_proportion = rxr.open_rasterio(f"{predicted_proportion_path}")
         # Filter values
         predicted_values = predicted_proportion.values
@@ -630,8 +630,8 @@ class resultCalculation():
         # Remove outside of floodplain area
         remove_values_outside_floodplain(
             fr"{self.main_path}/{self.result_path['type_test']}/floodproximity_input_domain.nc"
-            fr"{self.main_path}/{self.result_path['type_test']}/model_regression_{self.result_path['type_prediction']}/prediction/{self.result_path['name_prediction_file']}",
-            fr"{self.result_folder}/regression_{self.result_path['type_prediction']}_removeoutside.nc",
+            fr"{self.main_path}/{self.result_path['type_test']}/model_{self.result_path['type_prediction']}/prediction/{self.result_path['name_prediction_file']}",
+            fr"{self.result_folder}/{self.result_path['type_prediction']}_removeoutside.nc",
             filter_value_outside
         )
 
@@ -647,7 +647,7 @@ class resultCalculation():
             fr"{save_path}/actual_sd.tiff")  # Convert to tiff to remove river and sea
         actual_sd_path_new = fr"{save_path}/actual_sd.tiff"
         # Get predicted data
-        predicted_sd_path = fr"{save_path}/regression_{self.result_path['type_prediction']}_removeoutside.nc"
+        predicted_sd_path = fr"{save_path}/{self.result_path['type_prediction']}_removeoutside.nc"
         predicted_sd = rxr.open_rasterio(f"{predicted_sd_path}")
         # Filter values
         predicted_sd = predicted_sd.where(predicted_sd.values >= 0.01, 0)

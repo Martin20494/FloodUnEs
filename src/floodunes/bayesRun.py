@@ -1068,7 +1068,7 @@ class runBayesRegressionSD():
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(0)
         prediction_raster.rio.to_raster(
-            fr"{self.test_folder}/prediction/sd_regression_prediction.nc",
+            fr"{self.test_folder}/prediction/regression_sd_prediction.nc",
             dtype=np.float64
         )
 
@@ -1299,7 +1299,7 @@ class runTestExtra():
             dtype=np.float64
         )
 
-    def testextra_sd_regression_model(self,
+    def testextra_regression_sd_model(self,
                                       model_path,
                                       number_layers=8
                                       ):
@@ -1361,7 +1361,7 @@ class runTestExtra():
         prediction_raster.rio.write_crs("epsg:2193", inplace=True)
         prediction_raster.rio.write_nodata(0)
         prediction_raster.rio.to_raster(
-            fr"{testextra_folder}/prediction/sd_regression_prediction.nc",
+            fr"{testextra_folder}/prediction/regression_sd_prediction.nc",
             dtype=np.float64
         )
 
@@ -1501,7 +1501,7 @@ class runEstimation():
             fr"{self.estimate_folder}/regression_proportion_results.nc"
         )
 
-    def estimate_sd_regression_model(self,
+    def estimate_regression_sd_model(self,
                                      model_path,
                                      number_layers=8
                                      ):
