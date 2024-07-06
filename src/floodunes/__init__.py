@@ -11,3 +11,4 @@ from .dataPrep import *
 from .bayesFuncClassification import *
 from .bayesFuncRegression import *
 from .bayesRun import *
+from .resultAnalysis import *
