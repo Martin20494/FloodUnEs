@@ -347,8 +347,6 @@ def confusion_matrix_plot(
     np.bool = np.bool_
     cfm = confusion_matrix(actual_label,
                            prediction_label)
-    df_cfm = pd.DataFrame(cfm, index=[i for i in ['No flood', 'Maybe flood', 'Yes flood']],
-                          columns=['No flood', 'Maybe flood', 'Yes flood'])
     cfm_pc = np.stack([(cfm[i, :] / np.sum(cfm[i, :])) for i in range(3)])
     df_cfm_pc = pd.DataFrame(cfm_pc, index=[i for i in ['No flood', 'Maybe flood', 'Yes flood']],
                              columns=['No flood', 'Maybe flood', 'Yes flood'])
@@ -406,6 +404,7 @@ class resultCalculation():
             fr"{self.result_folder}/{self.result_path['type_prediction']}_removeoutside.nc",
             filter_value_outside
         )
+        print("hahahah")
 
         # Get save path
         save_path = fr"{self.result_folder}"
