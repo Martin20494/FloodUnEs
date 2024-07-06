@@ -976,6 +976,9 @@ class dataCollection:
         # 12. Proportion
         proportion_OUT = self.proportion_output()
 
+        # Flood proximity for filtering out results
+        floodproximity_IN = self.floodproximity_input()
+
         # Create dataframe
         ml_df = elev_IN.copy(deep=True)
         # Get name list for each para. Start from 'hanf'
@@ -1042,6 +1045,9 @@ class dataCollection:
         gaussiangradient_IN = self.gaussiangradient_input()
         # 10. SD
         sd_OUT = self.sd_output()
+
+        # Flood proximity for filtering out results
+        floodproximity_IN = self.floodproximity_input()
 
         # Create dataframe
         ml_df = depth_IN.copy(deep=True)
@@ -1111,6 +1117,9 @@ class dataCollection:
             flowaccumulation_IN = self.flowaccumulation_input()
             # 11. Proportion label
             proportionlabel_OUT = self.proportionlabel_output()
+
+            # Flood proximity for filtering out results
+            floodproximity_IN = self.floodproximity_input()
 
             # Create dataframe
             ml_df = elev_IN.copy(deep=True)
@@ -1341,6 +1350,9 @@ class dataCollection:
             # 11. Proximity difference
             proximitydifference_IN = self.proximitydifference_input()
 
+            # Flood proximity for filtering out results
+            floodproximity_IN = self.floodproximity_input()
+
             # Create dataframe
             ml_df = elev_IN.copy(deep=True)
             # Get name list for each para. Start from 'hanf'
@@ -1387,6 +1399,9 @@ class dataCollection:
             morphologicallaplace_IN = self.morphologicallaplace_input()
             # 9. Gaussian gradient
             gaussiangradient_IN = self.gaussiangradient_input()
+
+            # Flood proximity for filtering out results
+            floodproximity_IN = self.floodproximity_input()
 
             # Create dataframe
             ml_df = depth_IN.copy(deep=True)
