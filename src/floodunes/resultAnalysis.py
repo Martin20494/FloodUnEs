@@ -400,6 +400,13 @@ class resultCalculation():
         # Get save path
         save_path = fr"{self.result_folder}"
 
+        print(fr"{self.main_path}/{self.result_path['type_test']}/floodproximity_input_domain.nc")
+        print()
+        print(fr"{self.main_path}/{self.result_path['type_test']}/model_{self.result_path['type_prediction']}/prediction/{self.result_path['name_prediction_file']}",)
+        print()
+        print(fr"{save_path}/{self.result_path['type_prediction']}_removeoutside.nc")
+        print()
+
         # Remove outside of floodplain area
         remove_values_outside_floodplain(
             fr"{self.main_path}/{self.result_path['type_test']}/floodproximity_input_domain.nc"
