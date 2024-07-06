@@ -390,7 +390,7 @@ class resultCalculation():
 
         # Remove outside of floodplain area
         remove_values_outside_floodplain(
-            fr"{self.main_path}/{self.result_path['type_test']}/floodproximity_input_domain.nc"
+            fr"{self.main_path}/{self.result_path['type_test']}/floodproximity_input_domain.nc",
             fr"{self.main_path}/{self.result_path['type_test']}/model_{self.result_path['type_prediction']}/prediction/{self.result_path['name_prediction_file']}",
             fr"{self.result_folder}/{self.result_path['type_prediction']}_removeoutside.nc",
             filter_value_outside
