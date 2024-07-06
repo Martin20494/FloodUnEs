@@ -109,12 +109,13 @@ def remove_values_outside_floodplain(
     )
 
 def comparison_plot(
-    actual_proportion_filter,
-    predicted_proportion_filter,
+    actual_filter,
+    predicted_filter,
     difference,
     zoom_coord,
     inset_axes_position,
-    path_tosavingfolder
+    path_tosavingfolder,
+    title
 ):
     # Ref: https://stackoverflow.com/questions/33602042/how-to-move-a-colorbar-label-downward
     # Set up fig
@@ -124,7 +125,7 @@ def comparison_plot(
                                         sharey=True)
 
     # Actual
-    act = actual_proportion_filter.plot(
+    act = actual_filter.plot(
         add_colorbar=False,
         cmap='viridis',
         ax=ax1
@@ -133,11 +134,11 @@ def comparison_plot(
     ax1.set_xlabel('NZTM, south (m)', labelpad=15)
     ax1.set_ylabel('NZTM, north (m)', labelpad=10)
     act_cbar = fig.colorbar(act, ax=ax1)
-    act_cbar.set_label('proportion (m)', rotation=270, labelpad=10)
+    act_cbar.set_label(title, rotation=270, labelpad=10)
 
     # Zoom - actual
     act_zoom = ax1.inset_axes([inset_axes_position])
-    actual_proportion_filter.plot(
+    actual_filter.plot(
         add_colorbar=False,
         cmap='viridis',
         ax=act_zoom
@@ -170,8 +171,8 @@ def comparison_plot(
              verticalalignment='center',
              transform=ax1.transAxes)
 
-    # predicted_proportion_filter
-    pre = predicted_proportion_filter.plot(
+    # predicted_filter
+    pre = predicted_filter.plot(
         add_colorbar=False,
         cmap='viridis',
         ax=ax2
@@ -181,11 +182,11 @@ def comparison_plot(
     ax2.set_ylabel('')
     ax2.xaxis.set_tick_params(labelbottom=False)
     pre_cbar = fig.colorbar(pre, ax=ax2)
-    pre_cbar.set_label(label='proportion (m)', rotation=270, labelpad=10)
+    pre_cbar.set_label(label=title, rotation=270, labelpad=10)
 
     # Zoom - predicted_proportion_filter
     pre_zoom = ax2.inset_axes([inset_axes_position])
-    predicted_proportion_filter.plot(
+    predicted_filter.plot(
         add_colorbar=False,
         cmap='viridis',
         ax=pre_zoom
@@ -229,9 +230,9 @@ def comparison_plot(
     ax3.set_ylabel('')
     ax3.xaxis.set_tick_params(labelbottom=False)
     diff_cbar = fig.colorbar(diff, ax=ax3)
-    diff_cbar.set_label(label='proportion (m)', rotation=270, labelpad=10)
+    diff_cbar.set_label(label=title, rotation=270, labelpad=10)
 
-    # Zoom - predicted_proportion_filter
+    # Zoom - predicted_filter
     dif_zoom = ax3.inset_axes([inset_axes_position])
     difference.plot(
         add_colorbar=False,
@@ -268,7 +269,7 @@ def comparison_plot(
 
     # Save fig
     fig.savefig(
-        fr"{path_tosavingfolder}\3plots_COMPARISON.jpg",
+        fr"{path_tosavingfolder}\comparisonplot.jpg",
         bbox_inches='tight', dpi=600
     )
 
@@ -469,7 +470,8 @@ class resultCalculation():
             difference,
             zoom_coord_forcomparisonplot,
             inset_axis_position_forcomparisonplot,
-            save_path
+            save_path,
+            title='Proportion (%)'
         )
 
         # METRICS INCLUDE ZERO
@@ -703,7 +705,8 @@ class resultCalculation():
             difference,
             zoom_coord_forcomparisonplot,
             inset_axis_position_forcomparisonplot,
-            save_path
+            save_path,
+            title='Sd (m)'
         )
 
         # METRICS INCLUDE ZERO
