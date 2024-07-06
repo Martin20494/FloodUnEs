@@ -663,15 +663,25 @@ class resultCalculation():
         )
         predicted_sd_arr.rio.to_raster(fr"{save_path}/predicted_sd.tiff")  # Convert to tiff to remove river and sea
         predicted_sd_path_new = fr"{save_path}/predicted_sd.tiff"
+        # Get river
+        river_polygon = gpd.read_file(fr"{save_path}/river_polygon.geojson")
+        river_polygon.to_file(fr"{save_path}/river_polygon.shp")  # Convert to shapfile to remove river and sea
+        river_polygon_path = fr"{save_path}/river_polygon.shp"
         # Get sea
         sea_polygon = gpd.read_file(fr"{save_path}/polygon_angle_0.0_x_0.0_y_0.0.shp")
         sea_polygon.to_file(fr"{save_path}/sea_polygon.shp")
         sea_polygon_path = fr"{save_path}/sea_polygon.shp"
 
-        # REMOVE SEA
-        # Remove sea for ACTUAL
+        # Remove river and sea for ACTUAL
+        # River
+        value_change(river_polygon_path, actual_sd_path_new, 0, True)
+        # Sea
         value_change(sea_polygon_path, actual_sd_path_new, 0, True)
-        # Remove sea for PREDICTED
+
+        # Remove river and sea for PREDICTED
+        # River
+        value_change(river_polygon_path, predicted_sd_path_new, 0, True)
+        # Sea
         value_change(sea_polygon_path, predicted_sd_path_new, 0, True)
 
         # CONVERT TIFF TO NC
