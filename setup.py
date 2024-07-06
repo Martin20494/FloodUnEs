@@ -8,7 +8,7 @@ long_description = (here / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="floodunes",
-    version='0.0.7',
+    version='0.0.8',
     description="A package for estimating uncertainties in flood model outputs caused by square grid orientation and "
                 "bathymetry estimation",
     author='M. Nguyen',
