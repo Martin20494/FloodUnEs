@@ -395,7 +395,7 @@ class resultCalculation():
         self,
         zoom_coord_forcomparisonplot,
         inset_axis_position_forcomparisonplot,
-        zoom_list_forhistogram,
+        zoom_list_forhistogram=None,
         filter_value_outside=20,
     ):
 
@@ -586,13 +586,16 @@ class resultCalculation():
             'difference_histogram',
             zoom=None
         )
-        # Difference zoom
-        histogram(
-            difference,
-            save_path,
-            'difference_histogram',
-            zoom=zoom_list_forhistogram
-        )
+        if zoom_list_forhistogram != None:
+            # Difference zoom
+            histogram(
+                difference,
+                save_path,
+                'difference_histogram',
+                zoom=zoom_list_forhistogram
+            )
+        else:
+            pass
 
         # CONFUSION MATRIX
         confusion_matrix_plot(
@@ -625,7 +628,7 @@ class resultCalculation():
         self,
         zoom_coord_forcomparisonplot,
         inset_axis_position_forcomparisonplot,
-        zoom_list_forhistogram,
+        zoom_list_forhistogram=None,
         filter_value_outside=20
     ):
 
@@ -821,13 +824,16 @@ class resultCalculation():
             'difference_histogram',
             zoom=None
         )
-        # Difference zoom
-        histogram(
-            difference,
-            save_path,
-            'difference_histogram',
-            zoom=zoom_list_forhistogram
-        )
+        if zoom_list_forhistogram != None:
+            # Difference zoom
+            histogram(
+                difference,
+                save_path,
+                'difference_histogram',
+                zoom=zoom_list_forhistogram
+            )
+        else:
+            pass
 
 
 
