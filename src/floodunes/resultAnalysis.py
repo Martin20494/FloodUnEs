@@ -137,7 +137,7 @@ def comparison_plot(
     act_cbar.set_label(title, rotation=270, labelpad=10)
 
     # Zoom - actual
-    act_zoom = ax1.inset_axes([inset_axes_position])
+    act_zoom = ax1.inset_axes(inset_axes_position)
     actual_filter.plot(
         add_colorbar=False,
         cmap='viridis',
@@ -185,7 +185,7 @@ def comparison_plot(
     pre_cbar.set_label(label=title, rotation=270, labelpad=10)
 
     # Zoom - predicted_proportion_filter
-    pre_zoom = ax2.inset_axes([inset_axes_position])
+    pre_zoom = ax2.inset_axes(inset_axes_position)
     predicted_filter.plot(
         add_colorbar=False,
         cmap='viridis',
@@ -233,7 +233,7 @@ def comparison_plot(
     diff_cbar.set_label(label=title, rotation=270, labelpad=10)
 
     # Zoom - predicted_filter
-    dif_zoom = ax3.inset_axes([inset_axes_position])
+    dif_zoom = ax3.inset_axes(inset_axes_position)
     difference.plot(
         add_colorbar=False,
         cmap='seismic',
