@@ -397,7 +397,6 @@ class resultCalculation():
         )
 
 
-
     def resultProportion(
         self,
         zoom_coord_forcomparisonplot,
