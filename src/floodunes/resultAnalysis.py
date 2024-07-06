@@ -369,6 +369,9 @@ def confusion_matrix_plot(
         bbox_inches='tight', dpi=600
     )
 
+def print_something():
+    print('haha')
+
 
 class resultCalculation():
 
@@ -397,17 +400,20 @@ class resultCalculation():
         filter_value_outside=20,
     ):
 
+        # Get save path
+        save_path = fr"{self.result_folder}"
+
+        print_something()
+
         # Remove outside of floodplain area
         remove_values_outside_floodplain(
             fr"{self.main_path}/{self.result_path['type_test']}/floodproximity_input_domain.nc"
             fr"{self.main_path}/{self.result_path['type_test']}/model_{self.result_path['type_prediction']}/prediction/{self.result_path['name_prediction_file']}",
-            fr"{self.result_folder}/{self.result_path['type_prediction']}_removeoutside.nc",
+            fr"{save_path}/{self.result_path['type_prediction']}_removeoutside.nc",
             filter_value_outside
         )
         print("hahahah")
 
-        # Get save path
-        save_path = fr"{self.result_folder}"
 
         # GET ALL NECESSARY PATHS
         # Get actual data
