@@ -674,7 +674,7 @@ class runBayesRegressionProportion():
         # Get model data
         checkpoint = torch.load(fr"{pretrained_model_path}")
         retrain_model = MLP_BBB(self.number_layers, setseed=self.setseed).to(device)
-        retrain_model.load_state_dict(checkpoint['model_state_dict'], strict=True)
+        retrain_model.load_state_dict(checkpoint['model_state_dict'], strict=False)
         retrain_model_optimizer = torch.optim.Adam(retrain_model.parameters(), lr=self.lr)
         retrain_model_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 

@@ -825,6 +825,3 @@ class resultCalculation():
             )
         else:
             pass
-
-
-
