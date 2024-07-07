@@ -275,13 +275,14 @@ def comparison_plot(
 
 def scatterplot(
     data_df_remove0,
-    path_to_savingfolder
+    path_to_savingfolder,
+    indent_list
 ):
 
     plt.style.use('seaborn-whitegrid')
     fig, ax = plt.subplots(figsize=(5, 5))
 
-    ident = [0.0, 100]
+    ident = indent_list
     ax.plot(ident, ident, linestyle='--', color='black')
 
     sns.regplot(
@@ -558,7 +559,8 @@ class resultCalculation():
         # SCATTERPLOT
         scatterplot(
             data_df_remove0,
-            save_path
+            save_path,
+            [0, 100]
         )
 
         # HISTOGRAM - NO ZERO
@@ -787,7 +789,8 @@ class resultCalculation():
         # SCATTERPLOT
         scatterplot(
             data_df_remove0,
-            save_path
+            save_path,
+            [0, 2]
         )
 
         # HISTOGRAM - NO ZERO
