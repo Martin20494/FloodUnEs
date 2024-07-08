@@ -6,7 +6,6 @@ import pandas as pd
 
 import rioxarray as rxr
 import xarray as xr
-import rasterio as rio
 import geopandas as gpd
 
 import matplotlib.pyplot as plt
@@ -14,7 +13,7 @@ from mpl_toolkits.axes_grid1.inset_locator import TransformedBbox, \
                                                   BboxPatch
 import seaborn as sns
 
-from sklearn.metrics import confusion_matrix, accuracy_score, mean_absolute_error, r2_score
+from sklearn.metrics import confusion_matrix, mean_absolute_error, r2_score
 from sklearn.metrics import mean_squared_error, classification_report
 import scipy.stats as stats
 
@@ -115,7 +114,8 @@ def comparison_plot(
     zoom_coord,
     inset_axes_position,
     path_tosavingfolder,
-    title
+    title,
+    color_cmap='viridis'
 ):
     # Ref: https://stackoverflow.com/questions/33602042/how-to-move-a-colorbar-label-downward
     # Set up fig
@@ -127,7 +127,7 @@ def comparison_plot(
     # Actual
     act = actual_filter.plot(
         add_colorbar=False,
-        cmap='viridis',
+        cmap=color_cmap,
         ax=ax1
     )
     ax1.set_title('Monte Carlo result', pad=20)
@@ -141,7 +141,7 @@ def comparison_plot(
     act_zoom = ax1.inset_axes(inset_axes_position)
     actual_filter.plot(
         add_colorbar=False,
-        cmap='viridis',
+        cmap=color_cmap,
         ax=act_zoom
     )
     # Zoom - coordinates
@@ -179,7 +179,7 @@ def comparison_plot(
     # predicted_filter
     pre = predicted_filter.plot(
         add_colorbar=False,
-        cmap='viridis',
+        cmap=color_cmap,
         ax=ax2
     )
     ax2.set_title('BNNBB result', pad=20)
@@ -194,7 +194,7 @@ def comparison_plot(
     pre_zoom = ax2.inset_axes(inset_axes_position)
     predicted_filter.plot(
         add_colorbar=False,
-        cmap='viridis',
+        cmap=color_cmap,
         ax=pre_zoom
     )
     # Zoom - coordinates
@@ -582,21 +582,18 @@ class resultCalculation():
             actual_proportion_filter,
             save_path,
             'actual_histogram',
-            zoom=None
         )
         # Prediction
         histogram(
             predicted_proportion_filter,
             save_path,
             'predicted_histogram',
-            zoom=None
         )
         # Difference
         histogram(
             difference,
             save_path,
             'difference_histogram',
-            zoom=None
         )
         if zoom_list_forhistogram != None:
             # Difference zoom
@@ -712,7 +709,8 @@ class resultCalculation():
             zoom_coord_forcomparisonplot,
             inset_axis_position_forcomparisonplot,
             save_path,
-            title='Sd (m)'
+            title='Sd (m)',
+            color_cmap='plasma_r'
         )
 
         # METRICS INCLUDE ZERO
@@ -812,21 +810,18 @@ class resultCalculation():
             actual_sd_filter,
             save_path,
             'actual_histogram',
-            zoom=None
         )
         # Prediction
         histogram(
             predicted_sd_filter,
             save_path,
             'predicted_histogram',
-            zoom=None
         )
         # Difference
         histogram(
             difference,
             save_path,
             'difference_histogram',
-            zoom=None
         )
         if zoom_list_forhistogram != None:
             # Difference zoom
