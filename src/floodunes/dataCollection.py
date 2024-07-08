@@ -964,7 +964,7 @@ class dataCollection:
         curvature_IN = self.curvature_input()
         # 8. Flow accumulation
         old_flowaccumulation_IN = self.flowaccumulation_input()
-        flowaccumulation_IN = ((old_flowaccumulation_IN - 1)/(20000 - 1))*(20000 - 1) + 1
+        flowaccumulation_IN = ((old_flowaccumulation_IN - 1)/(old_flowaccumulation_IN.max() - 1))*(20000 - 1) + 1
 
         # 9. Proportion label
         if name_csv == 'train':
