@@ -135,7 +135,7 @@ def comparison_plot(
     ax1.set_ylabel('')
     act_cbar = fig.colorbar(act, ax=ax1, location="bottom")
     act_cbar.set_label(title, labelpad=20)
-    act_cbar.ax.tick_params(rotation=-90)
+    act_cbar.ax.tick_params(rotation=-90, length=3)
 
     # Zoom - actual
     act_zoom = ax1.inset_axes(inset_axes_position)
@@ -188,7 +188,7 @@ def comparison_plot(
     ax2.xaxis.set_tick_params(labelbottom=False)
     pre_cbar = fig.colorbar(pre, ax=ax2, location="bottom")
     pre_cbar.set_label(label=title, labelpad=20)
-    pre_cbar.ax.tick_params(rotation=-90)
+    pre_cbar.ax.tick_params(rotation=-90, length=3)
 
     # Zoom - predicted_proportion_filter
     pre_zoom = ax2.inset_axes(inset_axes_position)
@@ -240,7 +240,7 @@ def comparison_plot(
     ax3.xaxis.set_tick_params(labelbottom=False)
     diff_cbar = fig.colorbar(diff, ax=ax3, location="bottom")
     diff_cbar.set_label(label=title, labelpad=10)
-    diff_cbar.ax.tick_params(rotation=-90)
+    diff_cbar.ax.tick_params(rotation=-90, length=3)
 
     # Zoom - predicted_filter
     dif_zoom = ax3.inset_axes(inset_axes_position)
