@@ -120,9 +120,9 @@ def comparison_plot(
     # Ref: https://stackoverflow.com/questions/33602042/how-to-move-a-colorbar-label-downward
     # Set up fig
     fig, (ax1, ax2, ax3) = plt.subplots(ncols=3,
-                                        figsize=(13, 4),
-                                        sharex=True,
-                                        sharey=True)
+                                        figsize=(13, 4))
+
+    fig.subplots_adjust(wspace=.05, hspace=0)
 
     # Actual
     act = actual_filter.plot(
@@ -131,10 +131,11 @@ def comparison_plot(
         ax=ax1
     )
     ax1.set_title('Monte Carlo result', pad=20)
-    ax1.set_xlabel('NZTM, south (m)', labelpad=15)
-    ax1.set_ylabel('NZTM, north (m)', labelpad=10)
-    act_cbar = fig.colorbar(act, ax=ax1)
-    act_cbar.set_label(title, rotation=270, labelpad=10)
+    ax1.set_xlabel('')
+    ax1.set_ylabel('')
+    act_cbar = fig.colorbar(act, ax=ax1, location="bottom")
+    act_cbar.set_label(title, labelpad=20)
+    act_cbar.ax.tick_params(rotation=-90)
 
     # Zoom - actual
     act_zoom = ax1.inset_axes(inset_axes_position)
@@ -164,12 +165,16 @@ def comparison_plot(
     )
 
     # Text
-    ax1.text(0.1, 0.9, 'a)',
+    ax1.text(0.06, 0.9, 'a)',
              fontsize=15,
              color='white',
              horizontalalignment='center',
              verticalalignment='center',
              transform=ax1.transAxes)
+
+    ax2.set_xticks([])
+    ax2.set_yticks([])
+
 
     # predicted_filter
     pre = predicted_filter.plot(
@@ -181,8 +186,9 @@ def comparison_plot(
     ax2.set_xlabel('')
     ax2.set_ylabel('')
     ax2.xaxis.set_tick_params(labelbottom=False)
-    pre_cbar = fig.colorbar(pre, ax=ax2)
-    pre_cbar.set_label(label=title, rotation=270, labelpad=10)
+    pre_cbar = fig.colorbar(pre, ax=ax2, location="bottom")
+    pre_cbar.set_label(label=title, labelpad=20)
+    pre_cbar.ax.tick_params(rotation=-90)
 
     # Zoom - predicted_proportion_filter
     pre_zoom = ax2.inset_axes(inset_axes_position)
@@ -212,12 +218,15 @@ def comparison_plot(
     )
 
     # Text
-    ax2.text(0.1, 0.9, 'b)',
+    ax2.text(0.06, 0.9, 'b)',
              fontsize=15,
              color='white',
              horizontalalignment='center',
              verticalalignment='center',
              transform=ax2.transAxes)
+
+    ax2.set_xticks([])
+    ax2.set_yticks([])
 
     # difference
     diff = difference.plot(
@@ -229,8 +238,9 @@ def comparison_plot(
     ax3.set_xlabel('')
     ax3.set_ylabel('')
     ax3.xaxis.set_tick_params(labelbottom=False)
-    diff_cbar = fig.colorbar(diff, ax=ax3)
-    diff_cbar.set_label(label=title, rotation=270, labelpad=10)
+    diff_cbar = fig.colorbar(diff, ax=ax3, location="bottom")
+    diff_cbar.set_label(label=title, labelpad=10)
+    diff_cbar.ax.tick_params(rotation=-90)
 
     # Zoom - predicted_filter
     dif_zoom = ax3.inset_axes(inset_axes_position)
@@ -260,12 +270,15 @@ def comparison_plot(
     )
 
     # Text
-    ax3.text(0.1, 0.9, 'c)',
+    ax3.text(0.06, 0.9, 'c)',
              fontsize=15,
              color='black',
              horizontalalignment='center',
              verticalalignment='center',
              transform=ax3.transAxes)
+
+    ax3.set_xticks([])
+    ax3.set_yticks([])
 
     # Save fig
     fig.savefig(
