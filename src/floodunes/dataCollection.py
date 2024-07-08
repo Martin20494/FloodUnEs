@@ -957,7 +957,7 @@ class dataCollection:
         # 4. Depth
         depth_IN = self.depth_input()
         # 5. Slope
-        slope_IN = self.slope_input('slope_riserun')*100
+        slope_IN = self.slope_input('slope_riserun')
         # 6. Roughness
         roughness_IN = self.roughness_input()
         # 7. Curvature
