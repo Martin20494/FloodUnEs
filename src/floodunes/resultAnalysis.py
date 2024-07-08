@@ -239,7 +239,7 @@ def comparison_plot(
     ax3.set_ylabel('')
     ax3.xaxis.set_tick_params(labelbottom=False)
     diff_cbar = fig.colorbar(diff, ax=ax3, location="bottom")
-    diff_cbar.set_label(label=title, labelpad=10)
+    diff_cbar.set_label(label=title, labelpad=20)
     diff_cbar.ax.tick_params(rotation=-90, length=3)
 
     # Zoom - predicted_filter
