@@ -62,7 +62,7 @@ class runBayesClassification():
                  parameter_path,
                  coef, # for waikanae [1.2, 5, 1.7]
                  setseed=2,
-                 number_layers=9,
+                 number_layers=10,
                  lr=1e-4,
                  batchsize=16*16,
                  num_workers=1
@@ -1111,7 +1111,7 @@ class runTestExtra():
 
     def testextra_proportion_classification_model(self,
                                                  model_path,
-                                                 number_layers=9
+                                                 number_layers=10
                                                  ):
         # Create path
         Path(
