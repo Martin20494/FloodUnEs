@@ -11,6 +11,9 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1.inset_locator import TransformedBbox, \
                                                   BboxPatch
+from matplotlib import colors
+
+
 import seaborn as sns
 
 from sklearn.metrics import confusion_matrix, mean_absolute_error, r2_score
@@ -383,6 +386,283 @@ def confusion_matrix_plot(
         bbox_inches='tight', dpi=600
     )
 
+def plot_false_positive(
+    path_to_savingfolder,
+    path_wd,
+    path_prediction,
+    path_proportion,
+    zoom_coord,
+    inset_list
+):
+    # Get rasters
+    wd_raster = rxr.open_rasterio(
+        path_wd
+    )
+    wd_raster = wd_raster.where(wd_raster.values != -9999, 0)
+
+    prediction_raster = rxr.open_rasterio(
+        path_prediction
+    )
+
+    proportion_raster = rxr.open_rasterio(
+        path_proportion
+    )
+    proportion_raster = proportion_raster.where(proportion_raster.values != -9999, 0)
+
+    # Convert actual to labels
+    actual_label = proportion_raster.values.flatten().copy()
+    actual_label[(actual_label > 0) & (actual_label < 100)] = 1
+    actual_label[actual_label == 100] = 2
+
+    # Convert prediction to labels
+    prediction_label = prediction_raster.values.flatten().copy()
+    prediction_label[(prediction_label > 0) & (prediction_label < 100)] = 1
+    prediction_label[prediction_label == 100] = 2
+
+    # Convert all into one value 1
+    wd_raster_onecolor = wd_raster.where(wd_raster.values == 0, 1)
+    prediction_raster_onecolor = prediction_raster.where(prediction_raster.values == 0, 1)
+    proportion_raster_onecolor = proportion_raster.where(proportion_raster.values == 0, 1)
+    difference_raster_onecolor = proportion_raster_onecolor - prediction_raster_onecolor
+
+    # Convert differences into one positive integers
+    difference_raster_onecolor = difference_raster_onecolor.where(difference_raster_onecolor.values != -1, 2)
+    difference_raster_onecolor_inf = difference_raster_onecolor.where(difference_raster_onecolor.values != 0, np.inf)
+
+    # Calculate other differences among water depth, Monte Carlo proportion, and prediction
+    # Find the difference between Monte and one-run water depth
+    difference_wd_proportion = proportion_raster_onecolor - wd_raster_onecolor
+    # Convert all values equal or less than one-run water depth to 0
+    difference_wd_proportion_onecolor = difference_wd_proportion.where(difference_wd_proportion.values == 1, 0)
+    # Convert values larger than one-run water depth into 2
+    difference_wd_proportion_onecolor = difference_wd_proportion_onecolor.where(
+        difference_wd_proportion_onecolor.values == 0, 2)
+    # Combine one-run water depth and the filtered difference
+    wd_proportion = difference_wd_proportion_onecolor + wd_raster_onecolor
+
+
+    # Find the difference between Prediction and one-run water depth
+    difference_wd_prediction = prediction_raster_onecolor - wd_raster_onecolor
+    # Convert all values equal or less than one-run water depth to 0
+    difference_wd_prediction_onecolor = difference_wd_prediction.where(difference_wd_prediction.values == 1, 0)
+    # Convert values larger than one-run water depth into 2
+    difference_wd_prediction_onecolor = difference_wd_prediction_onecolor.where(
+        difference_wd_prediction_onecolor.values == 0, 2)
+    # Combine one-run water depth and the filtered difference
+    wd_prediction = difference_wd_prediction_onecolor + wd_raster_onecolor
+
+    # Convert this into one vlaue for futher filter
+    wd_prediction_onevalue = wd_prediction.where(wd_prediction.values == 0, 1)
+
+    # Find the difference between prediction_wd and Monte
+    difference_wd_prediction_proportion = proportion_raster_onecolor - wd_prediction_onevalue
+    # Convert all values equal or less than wd_prediction_onevalue to 0
+    difference_wd_prediction_proportion_onecolor = difference_wd_prediction_proportion.where(
+        difference_wd_prediction_proportion.values == 1, 0)
+    # Convert values larger than wd_prediction_onevalue to 2
+    difference_wd_prediction_proportion_onecolor = difference_wd_prediction_proportion_onecolor.where(
+        difference_wd_prediction_proportion_onecolor.values == 0, 3)
+    # Combine wd_prediction_onevalue and proportion
+    wd_prediction_proportion = difference_wd_prediction_proportion_onecolor + wd_prediction
+
+    # Convert 0 to inf
+    wd_proportion_inf = wd_proportion.where(wd_proportion.values != 0, np.inf)
+    wd_prediction_proportion_inf = wd_prediction_proportion.where(wd_prediction_proportion.values != 0, np.inf)
+
+    fig, (ax1, ax2, ax3) = plt.subplots(
+        ncols=3,
+        figsize=(13, 4)
+    )
+
+    fig.subplots_adjust(wspace=.05, hspace=0)
+
+    # Colorbar setup
+    cmap = colors.ListedColormap(['gold', 'black'])
+    bounds = [1, 2, 3]
+
+    # Plot raster
+    wd_proportion_plot = wd_proportion_inf.plot(
+        add_colorbar=False,
+        cmap=cmap,
+        levels=bounds,
+        ax=ax1
+    )
+
+    # Plot colorbar
+    cb = fig.colorbar(wd_proportion_plot, ax=ax1, location='bottom')
+    labels = np.arange(1, 3, 1)
+    loc = labels + .5
+    cb.set_ticks(loc)
+    cb.set_ticklabels([
+        'One-time running\nwater depth',
+        'Monte-Carlo\nproportion'
+    ])
+
+    # Setup titles labels
+    ax1.set_xlabel('')
+    ax1.set_ylabel('')
+    ax1.set_title('')
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+
+    # Zoom
+    # ax1es zoom
+    ax1_zoom = ax1.inset_axes(inset_list)
+    wd_proportion_inf.plot(
+        add_colorbar=False,
+        cmap=cmap,
+        levels=bounds,
+        ax=ax1_zoom
+    )
+    # Zoom - coordinates
+    ax1_zoom.set_xlim(zoom_coord[0], zoom_coord[1])
+    ax1_zoom.set_ylim(zoom_coord[2], zoom_coord[3])
+    # Remove all labels and ticks of zoom
+    ax1_zoom.set_title('')
+    ax1_zoom.set_xticks([])
+    ax1_zoom.set_yticks([])
+    ax1_zoom.set_xlabel('')
+    ax1_zoom.set_ylabel('')
+    # Remove black edge of plot background
+    for spine in ax1_zoom.spines.values():
+        spine.set_edgecolor('fuchsia')
+        spine.set_linewidth(1)
+    # Plot zoom
+    mark_inset_noconnectedline(
+        ax1,
+        ax1_zoom,
+        fc="none", ec="fuchsia", linewidth=1,
+        zorder=3
+    )
+
+    # AXES 2 ==============================================
+
+    # Colorbar setup
+    cmap = colors.ListedColormap(['gold', 'red', 'black'])
+    bounds = [1, 2, 3, 4]
+
+    # Plot raster
+    wd_prediction_proportion_plot = wd_prediction_proportion_inf.plot(
+        add_colorbar=False,
+        cmap=cmap,
+        levels=bounds,
+        ax=ax2
+    )
+
+    # Plot colorbar
+    cb = fig.colorbar(wd_prediction_proportion_plot, ax=ax2, location='bottom')
+    labels = np.arange(1, 4, 1)
+    loc = labels + .5
+    cb.set_ticks(loc)
+    cb.set_ticklabels([
+        'One-time running\nwater depth',
+        'Predicted\nproportion',
+        'Monte-Carlo\nproportion'
+    ])
+
+    # Setup titles labels
+    ax2.set_xlabel('')
+    ax2.set_ylabel('')
+    ax2.set_title('')
+    ax2.set_xticks([])
+    ax2.set_yticks([])
+
+    # Zoom
+    # ax2es zoom
+    ax2_zoom = ax2.inset_axes(inset_list)
+    wd_prediction_proportion_inf.plot(
+        add_colorbar=False,
+        cmap=cmap,
+        levels=bounds,
+        ax=ax2_zoom
+    )
+    # Zoom - coordinates
+    ax2_zoom.set_xlim(zoom_coord[0], zoom_coord[1])
+    ax2_zoom.set_ylim(zoom_coord[2], zoom_coord[3])
+    # Remove all labels and ticks of zoom
+    ax2_zoom.set_title('')
+    ax2_zoom.set_xticks([])
+    ax2_zoom.set_yticks([])
+    ax2_zoom.set_xlabel('')
+    ax2_zoom.set_ylabel('')
+    # Remove black edge of plot background
+    for spine in ax2_zoom.spines.values():
+        spine.set_edgecolor('fuchsia')
+        spine.set_linewidth(1)
+    # Plot zoom
+    mark_inset_noconnectedline(
+        ax2,
+        ax2_zoom,
+        fc="none", ec="fuchsia", linewidth=1,
+        zorder=3
+    )
+
+    # AXES 3 ============================================
+
+    # Colorbar setup
+    cmap = colors.ListedColormap(['red', 'blue'])
+    bounds = [1, 2, 3]
+
+    # Plot raster
+    difference_plot = difference_raster_onecolor_inf.plot(
+        add_colorbar=False,
+        cmap=cmap,
+        levels=bounds,
+        ax=ax3
+    )
+
+    # Plot colorbar
+    cb = fig.colorbar(difference_plot, ax=ax3, location='bottom')
+    labels = np.arange(1, 3, 1)
+    loc = labels + .5
+    cb.set_ticks(loc)
+    cb.set_ticklabels([
+        'False positive\nMC: Flooded\nPrediction: Not flooded',
+        'False negative\nMC: Not flooded\nPrediction: Flooded'
+    ])
+
+    # Setup titles labels
+    ax3.set_xlabel('')
+    ax3.set_ylabel('')
+    ax3.set_title('')
+    ax3.set_xticks([])
+    ax3.set_yticks([])
+
+    # Zoom
+    # ax3es zoom
+    ax3_zoom = ax3.inset_axes(inset_list)
+    difference_raster_onecolor_inf.plot(
+        add_colorbar=False,
+        cmap=cmap,
+        levels=bounds,
+        ax=ax3_zoom
+    )
+    # Zoom - coordinates
+    ax3_zoom.set_xlim(zoom_coord[0], zoom_coord[1])
+    ax3_zoom.set_ylim(zoom_coord[2], zoom_coord[3])
+    # Remove all labels and ticks of zoom
+    ax3_zoom.set_title('')
+    ax3_zoom.set_xticks([])
+    ax3_zoom.set_yticks([])
+    ax3_zoom.set_xlabel('')
+    ax3_zoom.set_ylabel('')
+    # Remove black edge of plot background
+    for spine in ax3_zoom.spines.values():
+        spine.set_edgecolor('fuchsia')
+        spine.set_linewidth(1)
+    # Plot zoom
+    mark_inset_noconnectedline(
+        ax3,
+        ax3_zoom,
+        fc="none", ec="fuchsia", linewidth=1,
+        zorder=3
+    )
+
+    # Save fig
+    fig.savefig(
+        fr"{path_to_savingfolder}/false_positive_plot.jpg",
+        bbox_inches='tight', dpi=600
+    )
 
 class resultCalculation():
 
@@ -631,6 +911,17 @@ class resultCalculation():
         )
         df_confusion = pd.DataFrame(confusion_report).transpose()
         df_confusion.to_csv(fr"{save_path}/confusion_metrics.csv", index=False)
+
+        # Plot false positive
+        plot_false_positive(
+            save_path,
+            fr"{self.main_path}/{self.result_path['type_test']}/wd_input_domain.nc",
+            fr"{save_path}/predicted_proportion_full_filter.nc",
+            fr"{save_path}/actual_proportion_filter.nc",
+            zoom_coord_forcomparisonplot,
+            inset_axis_position_forcomparisonplot,
+        )
+
 
 
     def resultSD(
