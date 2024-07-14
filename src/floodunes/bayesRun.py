@@ -112,6 +112,11 @@ class runBayesClassification():
         self.class_weight_new = class_weight_new
 
         print(self.class_weight_new)
+        for i, (train, label) in enumerate(self.trainloader):
+            print("i: ", i)
+            print("train: ", train.shape)
+            print("label: ", label.shape)
+            print("---------------")
 
         # Set up layers and model
         self.number_layers = number_layers
@@ -1111,7 +1116,7 @@ class runTestExtra():
 
     def testextra_proportion_classification_model(self,
                                                  model_path,
-                                                 number_layers=10
+                                                 number_layers=9
                                                  ):
         # Create path
         Path(
