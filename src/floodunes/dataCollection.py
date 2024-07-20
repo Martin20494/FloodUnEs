@@ -889,23 +889,21 @@ class dataCollection:
         elev_IN = self.dem_input()
         # 3. HANF
         hanf_IN = self.hanf_input()
-        # 4. Depth
-        depth_IN = self.depth_input()
-        # 5. Depth label
+        # 4. Depth label
         depthlabel_IN = self.depthlabel_input()
-        # 6. Slope
+        # 5. Slope
         slope_IN = self.slope_input()
-        # 7. Manning
+        # 6. Manning
         manning_IN = self.manning_input()
-        # 8. Flood proximity
+        # 7. Flood proximity
         floodproximity_IN = self.floodproximity_input()
-        # 9. Sobel edge label
+        # 8. Sobel edge label
         sobeledgelabel_IN = self.sobeledgelabel_input()
-        # 10. Curvature
+        # 9. Curvature
         curvature_IN = self.curvature_input()
-        # 11. Flow accumulation
+        # 10. Flow accumulation
         flowaccumulation_IN = self.flowaccumulation_input()
-        # 12. Proportion label
+        # 11. Proportion label
         proportionlabel_OUT = self.proportionlabel_output()
 
         # Create dataframe
@@ -913,7 +911,6 @@ class dataCollection:
         # Get name list for each para. Start from 'hanf'
         para_names_list = [
             'hanf',
-            'depth',
             'depthlabel',
             'slope',
             'manning',
@@ -926,7 +923,6 @@ class dataCollection:
         # Get list of para values. Start from 'hanf'
         para_values_list = [
             hanf_IN,
-            depth_IN,
             depthlabel_IN,
             slope_IN,
             manning_IN,
@@ -1105,34 +1101,29 @@ class dataCollection:
             elev_IN = self.dem_input()
             # 3. HANF
             hanf_IN = self.hanf_input()
-            # 4. Depth
-            depth_IN = self.depth_input()
-            # 5. Depth label
+            # 4. Depth label
             depthlabel_IN = self.depthlabel_input()
-            # 6. Slope
+            # 5. Slope
             slope_IN = self.slope_input()
-            # 7. Manning
+            # 6. Manning
             manning_IN = self.manning_input()
-            # 8. Flood proximity
+            # 7. Flood proximity
             floodproximity_IN = self.floodproximity_input()
-            # 9. Sobel edge label
+            # 8. Sobel edge label
             sobeledgelabel_IN = self.sobeledgelabel_input()
-            # 10. Curvature
+            # 9. Curvature
             curvature_IN = self.curvature_input()
-            # 11. Flow accumulation
+            # 10. Flow accumulation
             flowaccumulation_IN = self.flowaccumulation_input()
-            # 12. Proportion label
+            # 11. Proportion label
             proportionlabel_OUT = self.proportionlabel_output()
 
-            # Flood proximity for filtering out results
-            floodproximity_IN = self.floodproximity_input()
 
             # Create dataframe
             ml_df = elev_IN.copy(deep=True)
             # Get name list for each para. Start from 'hanf'
             para_names_list = [
                 'hanf',
-                'depth',
                 'depthlabel',
                 'slope',
                 'manning',
@@ -1145,7 +1136,6 @@ class dataCollection:
             # Get list of para values. Start from 'hanf'
             para_values_list = [
                 hanf_IN,
-                depth_IN,
                 depthlabel_IN,
                 slope_IN,
                 manning_IN,
