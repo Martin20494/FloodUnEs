@@ -400,12 +400,30 @@ def plot_false_positive(
     )
     wd_raster = wd_raster.where(wd_raster.values != -9999, 0)
 
-    prediction_raster = rxr.open_rasterio(
+    prediction_coords = rxr.open_rasterio(
         path_prediction
     )
+    prediction_raster = xr.DataArray(
+        data=prediction_coords.values[0],
+        dims=['y', 'x'],
+        coords={
+            'x': (['x'], wd_raster.x.values),
+            'y': (['y'], wd_raster.y.values)
+        },
+        attrs=wd_raster.attrs
+    )
 
-    proportion_raster = rxr.open_rasterio(
+    proportion_coords = rxr.open_rasterio(
         path_proportion
+    )
+    proportion_raster = xr.DataArray(
+        data=proportion_coords.values[0],
+        dims=['y', 'x'],
+        coords={
+            'x': (['x'], wd_raster.x.values),
+            'y': (['y'], wd_raster.y.values)
+        },
+        attrs=wd_raster.attrs
     )
     proportion_raster = proportion_raster.where(proportion_raster.values != -9999, 0)
 
