@@ -1175,6 +1175,9 @@ class dataCollection:
             # 12. Proportion
             proportion_OUT = self.proportion_output()
 
+            # Flood proximity
+            floodproximity_IN = self.floodproximity_input()
+
             # Create dataframe
             ml_df = elev_IN.copy(deep=True)
             # Get name list for each para. Start from 'hanf'
