@@ -62,7 +62,7 @@ class runBayesClassification():
                  parameter_path,
                  coef, # for waikanae [1.2, 5, 1.7]
                  setseed=2,
-                 number_layers=7,
+                 number_layers=8,
                  lr=1e-4,
                  batchsize=16*16,
                  num_workers=1
