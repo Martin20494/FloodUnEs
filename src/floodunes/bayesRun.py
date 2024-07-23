@@ -1116,7 +1116,7 @@ class runTestExtra():
 
     def testextra_proportion_classification_model(self,
                                                  model_path,
-                                                 number_layers=9
+                                                 number_layers=8
                                                  ):
         # Create path
         Path(
