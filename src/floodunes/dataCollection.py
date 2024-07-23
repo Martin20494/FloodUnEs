@@ -887,16 +887,16 @@ class dataCollection:
         # Call out each para
         # DEM - include 3 columns - x, y, dem - so the next para will be counted from 3
         elev_IN = self.dem_input()
-        # # 3. HANF
-        # hanf_IN = self.hanf_input()
+        # 3. HANF
+        hanf_IN = self.hanf_input()
         # 4. Depth label
         depthlabel_IN = self.depthlabel_input()
         # 5. Slope
         slope_IN = self.slope_input()
         # 6. Manning
         manning_IN = self.manning_input()
-        # 7. Flood proximity
-        floodproximity_IN = self.floodproximity_input()
+        # # 7. Flood proximity
+        # floodproximity_IN = self.floodproximity_input()
         # 8. Sobel edge label
         sobeledgelabel_IN = self.sobeledgelabel_input()
         # 9. Curvature
@@ -910,11 +910,11 @@ class dataCollection:
         ml_df = elev_IN.copy(deep=True)
         # Get name list for each para. Start from 'hanf'
         para_names_list = [
-            # 'hanf',
+            'hanf',
             'depthlabel',
             'slope',
             'manning',
-            'floodproximity',
+            # 'floodproximity',
             'sobeledgelabel',
             'curvature',
             'flowaccumulation',
@@ -922,11 +922,11 @@ class dataCollection:
         ]
         # Get list of para values. Start from 'hanf'
         para_values_list = [
-            # hanf_IN,
+            hanf_IN,
             depthlabel_IN,
             slope_IN,
             manning_IN,
-            floodproximity_IN,
+            # floodproximity_IN,
             sobeledgelabel_IN,
             curvature_IN,
             flowaccumulation_IN,
@@ -1099,16 +1099,16 @@ class dataCollection:
             # Call out each para
             # DEM - include 3 columns - x, y, dem - so the next para will be counted from 3
             elev_IN = self.dem_input()
-            # # 3. HANF
-            # hanf_IN = self.hanf_input()
+            # 3. HANF
+            hanf_IN = self.hanf_input()
             # 4. Depth label
             depthlabel_IN = self.depthlabel_input()
             # 5. Slope
             slope_IN = self.slope_input()
             # 6. Manning
             manning_IN = self.manning_input()
-            # 7. Flood proximity
-            floodproximity_IN = self.floodproximity_input()
+            # # 7. Flood proximity
+            # floodproximity_IN = self.floodproximity_input()
             # 8. Sobel edge label
             sobeledgelabel_IN = self.sobeledgelabel_input()
             # 9. Curvature
@@ -1123,11 +1123,11 @@ class dataCollection:
             ml_df = elev_IN.copy(deep=True)
             # Get name list for each para. Start from 'hanf'
             para_names_list = [
-                # 'hanf',
+                'hanf',
                 'depthlabel',
                 'slope',
                 'manning',
-                'floodproximity',
+                # 'floodproximity',
                 'sobeledgelabel',
                 'curvature',
                 'flowaccumulation',
@@ -1135,11 +1135,11 @@ class dataCollection:
             ]
             # Get list of para values. Start from 'hanf'
             para_values_list = [
-                # hanf_IN,
+                hanf_IN,
                 depthlabel_IN,
                 slope_IN,
                 manning_IN,
-                floodproximity_IN,
+                # floodproximity_IN,
                 sobeledgelabel_IN,
                 curvature_IN,
                 flowaccumulation_IN,
