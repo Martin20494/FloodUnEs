@@ -543,7 +543,7 @@ class runBayesRegressionProportion():
     def __init__(self,
                  parameter_path,
                  setseed=2,
-                 number_layers=9,
+                 number_layers=10,
                  lr=0.001,
                  batchsize=3200,
                  num_workers=1,
