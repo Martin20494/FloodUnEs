@@ -1007,6 +1007,10 @@ class resultCalculation():
         # CONVERSION UPPER AND LOWER BOUNDARIES
         # Lower boundaries
         actual_sd_filter = actual_sd_filter.where(actual_sd_filter.values >= 0.01, 0)
+        print(actual_sd_filter.values.min())
+        print(actual_sd_filter.values.min())
+        print(predicted_sd_filter.values.max())
+        print(predicted_sd_filter.values.min())
         # Upper boundaries
         actual_sd_filter = actual_sd_filter.where(actual_sd_filter.values <= predicted_sd_filter.values.max(),
                                                   predicted_sd_filter.values.max())
