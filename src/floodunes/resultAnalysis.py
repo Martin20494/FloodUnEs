@@ -1008,12 +1008,13 @@ class resultCalculation():
         # Lower boundaries
         actual_sd_filter = actual_sd_filter.where(actual_sd_filter.values >= 0.01, 0)
         print(np.min(actual_sd_filter.values[actual_sd_filter.values != 0]))
-        print(actual_sd_filter.values.max())
         print(np.min(predicted_sd_filter.values[predicted_sd_filter.values != 0]))
-        print(predicted_sd_filter.values.max())
         # Upper boundaries
         actual_sd_filter = actual_sd_filter.where(actual_sd_filter.values <= predicted_sd_filter.values.max(),
                                                   predicted_sd_filter.values.max())
+        print(actual_sd_filter.values.max())
+        print(predicted_sd_filter.values.max())
+
         # Write out
         actual_sd_filter.rio.to_raster(fr"{save_path}/actual_sd_filter.nc")
         predicted_sd_filter.rio.to_raster(fr"{save_path}/predicted_sd_full_filter.nc")
