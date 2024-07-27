@@ -946,7 +946,7 @@ class resultCalculation():
         self,
         zoom_coord_forcomparisonplot,
         inset_axis_position_forcomparisonplot,
-        max_value,
+        max_value=None,
         zoom_list_forhistogram=None,
     ):
 
@@ -1008,15 +1008,14 @@ class resultCalculation():
         # CONVERSION UPPER AND LOWER BOUNDARIES
         # Lower boundaries
         actual_sd_filter = actual_sd_filter.where(actual_sd_filter.values >= 0.01, 0)
-        print(np.min(actual_sd_filter.values[actual_sd_filter.values != 0]))
-        print(np.min(predicted_sd_filter.values[predicted_sd_filter.values != 0]))
-        # Upper boundaries
-        actual_sd_filter = actual_sd_filter.where(actual_sd_filter.values <= max_value,
-                                                  max_value)
-        predicted_sd_filter = predicted_sd_filter.where(predicted_sd_filter.values <= max_value,
-                                                        max_value)
-        print(actual_sd_filter.values.max())
-        print(predicted_sd_filter.values.max())
+        if max_value != None:
+            # Upper boundaries
+            actual_sd_filter = actual_sd_filter.where(actual_sd_filter.values <= max_value,
+                                                      max_value)
+            predicted_sd_filter = predicted_sd_filter.where(predicted_sd_filter.values <= max_value,
+                                                            max_value)
+        else:
+            pass
 
         # Write out
         actual_sd_filter.rio.to_raster(fr"{save_path}/actual_sd_filter.nc")
@@ -1067,7 +1066,7 @@ class resultCalculation():
             'BNNBB_result': predicted_sd_filter.values.flatten()
         }
         data_df_full = pd.DataFrame(data=data_full)
-        data_df_remove0 = data_df_full.query('0 < Monte_Carlo_result < 100')
+        data_df_remove0 = data_df_full.query('0 < Monte_Carlo_result')
         # Calculate MSE
         mse_remove0 = mean_squared_error(
             data_df_remove0.Monte_Carlo_result,
