@@ -946,6 +946,7 @@ class resultCalculation():
         self,
         zoom_coord_forcomparisonplot,
         inset_axis_position_forcomparisonplot,
+        max_value,
         zoom_list_forhistogram=None,
     ):
 
@@ -1010,8 +1011,10 @@ class resultCalculation():
         print(np.min(actual_sd_filter.values[actual_sd_filter.values != 0]))
         print(np.min(predicted_sd_filter.values[predicted_sd_filter.values != 0]))
         # Upper boundaries
-        actual_sd_filter = actual_sd_filter.where(actual_sd_filter.values <= predicted_sd_filter.values.max(),
-                                                  predicted_sd_filter.values.max())
+        actual_sd_filter = actual_sd_filter.where(actual_sd_filter.values <= max_value,
+                                                  max_value)
+        predicted_sd_filter = predicted_sd_filter.where(predicted_sd_filter.values <= max_value,
+                                                        max_value)
         print(actual_sd_filter.values.max())
         print(predicted_sd_filter.values.max())
 
