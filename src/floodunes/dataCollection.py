@@ -1230,6 +1230,9 @@ class dataCollection:
             # 10. SD
             sd_OUT = self.sd_output()
 
+            # Flood proximity
+            floodproximity_IN = self.floodproximity_input()
+
             # Create dataframe
             ml_df = depth_IN.copy(deep=True)
             # Get name list for each para. Start from 'hanf'
