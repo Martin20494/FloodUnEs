@@ -952,21 +952,18 @@ class resultCalculation():
         # Get save path
         save_path = fr"{self.result_folder}"
 
-        # GET ALL NECESSARY DATA
-        # Get path
+        # GET ALL NECESSARY PATHS
+        # Get actual data
         actual_sd_path = fr"{self.main_path}/{self.result_path['actual_file_name']}"
         actual_sd = rxr.open_rasterio(f"{actual_sd_path}")
-        predicted_sd_path = fr"{save_path}/{self.result_path['type_prediction']}_removeoutside.nc"
-        predicted_sd = rxr.open_rasterio(f"{predicted_sd_path}")
-
-        # Filter data
-        # Actual data
-        actual_sd = actual_sd.where(actual_sd.values >= 0.01, 0)
-        actual_sd = actual_sd.where(actual_sd.values <= predicted_sd.values.max(), predicted_sd.values.max())
+        actual_sd = actual_sd.where(actual_sd.values != -9999, 0)
         actual_sd.rio.to_raster(
             fr"{save_path}/actual_sd.tiff")  # Convert to tiff to remove river and sea
         actual_sd_path_new = fr"{save_path}/actual_sd.tiff"
-        # Predicted data
+        # Get predicted data
+        predicted_sd_path = fr"{save_path}/{self.result_path['type_prediction']}_removeoutside.nc"
+        predicted_sd = rxr.open_rasterio(f"{predicted_sd_path}")
+        # Filter values
         predicted_sd = predicted_sd.where(predicted_sd.values >= 0.01, 0)
         # Change coordinates
         predicted_sd_arr = xr.DataArray(
@@ -980,7 +977,6 @@ class resultCalculation():
         )
         predicted_sd_arr.rio.to_raster(fr"{save_path}/predicted_sd.tiff")  # Convert to tiff to remove river and sea
         predicted_sd_path_new = fr"{save_path}/predicted_sd.tiff"
-
         # Get river
         river_polygon = gpd.read_file(fr"{save_path}/river_polygon.geojson")
         river_polygon.to_file(fr"{save_path}/river_polygon.shp")  # Convert to shapfile to remove river and sea
@@ -1005,9 +1001,17 @@ class resultCalculation():
         # CONVERT TIFF TO NC
         # Actual
         actual_sd_filter = rxr.open_rasterio(fr"{actual_sd_path_new}")
-        actual_sd_filter.rio.to_raster(fr"{save_path}/actual_sd_filter.nc")
         # Predicted
         predicted_sd_filter = rxr.open_rasterio(fr"{predicted_sd_path_new}")
+
+        # CONVERSION UPPER AND LOWER BOUNDARIES
+        # Lower boundaries
+        actual_sd_filter = actual_sd_filter.where(actual_sd_filter.values >= 0.01, 0)
+        # Upper boundaries
+        actual_sd_filter = actual_sd_filter.where(actual_sd_filter.values <= predicted_sd_filter.values.max(),
+                                                  predicted_sd_filter.values.max())
+        # Write out
+        actual_sd_filter.rio.to_raster(fr"{save_path}/actual_sd_filter.nc")
         predicted_sd_filter.rio.to_raster(fr"{save_path}/predicted_sd_full_filter.nc")
 
         # DIFFERENCE
