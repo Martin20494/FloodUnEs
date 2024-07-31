@@ -97,26 +97,14 @@ def remove_values_outside_floodplain(
         fr"{path_to_prediction}"
     )
     # Convert proximity
-    proximity_ori = rxr.open_rasterio(
+    proximity = rxr.open_rasterio(
         fr"{path_to_floodproximity}"
     )
-    proximity = xr.DataArray(
-        data=proximity_ori.values[0],
-        dims=['y', 'x'],
-        coords={
-            'x': (['x'], prediction.x.values),
-            'y': (['y'], prediction.y.values)
-        },
-        attrs=prediction.attrs
-    )
-
 
     # Remove values
     new_prediction = prediction.where(
         proximity.values < filter_value, 0
     )
-
-    # Write out
     new_prediction.rio.to_raster(
         fr"{path_to_foldersavingthefile}"
     )
