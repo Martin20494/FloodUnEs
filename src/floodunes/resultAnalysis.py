@@ -93,12 +93,23 @@ def remove_values_outside_floodplain(
 ):
 
     # Get rasters
-    proximity = rxr.open_rasterio(
-        fr"{path_to_floodproximity}"
-    )
     prediction = rxr.open_rasterio(
         fr"{path_to_prediction}"
     )
+    # Convert proximity
+    proximity_ori = rxr.open_rasterio(
+        fr"{path_to_floodproximity}"
+    )
+    proximity = xr.DataArray(
+        data=proximity_ori.values[0],
+        dims=['y', 'x'],
+        coords={
+            'x': (['x'], prediction.x.values),
+            'y': (['y'], prediction.y.values)
+        },
+        attrs=prediction.attrs
+    )
+
 
     # Remove values
     new_prediction = prediction.where(
@@ -635,8 +646,8 @@ def plot_false_positive(
     loc = labels + .5
     cb.set_ticks(loc)
     cb.set_ticklabels([
-        'False positive\nMC: Flooded\nPrediction: Not flooded',
-        'False negative\nMC: Not flooded\nPrediction: Flooded'
+        'False negative\nMC: Flooded\nPrediction: Not flooded',
+        'False positive\nMC: Not flooded\nPrediction: Flooded'
     ])
 
     # Setup titles labels
