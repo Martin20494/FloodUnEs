@@ -432,13 +432,13 @@ class dataPreparation:
             test_df.to_csv(fr"{self.para_path['train']['general_folder']}/test_df_regression_proportion.csv", index=False)
 
             # Flatten data
-            x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:12])].to_numpy().T
+            x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:(len(ml_train_df.columns)-1)])].to_numpy().T
             y_train_flatten_channel = train_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_val_flatten_channel = val_df.loc[:, list(ml_train_df.columns[2:12])].to_numpy().T
+            x_val_flatten_channel = val_df.loc[:, list(ml_train_df.columns[2:(len(ml_train_df.columns)-1)])].to_numpy().T
             y_val_flatten_channel = val_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_test_flatten_channel = test_df.loc[:, list(ml_train_df.columns[2:12])].to_numpy().T
+            x_test_flatten_channel = test_df.loc[:, list(ml_train_df.columns[2:(len(ml_train_df.columns)-1)])].to_numpy().T
             y_test_flatten_channel = test_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
 
@@ -469,13 +469,13 @@ class dataPreparation:
                            index=False)
 
             # Flatten data
-            x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:12])].to_numpy().T
+            x_train_flatten_channel = train_df.loc[:, list(ml_train_df.columns[2:(len(ml_train_df.columns)-1)])].to_numpy().T
             y_train_flatten_channel = train_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_val_flatten_channel = val_df.loc[:, list(ml_train_df.columns[2:12])].to_numpy().T
+            x_val_flatten_channel = val_df.loc[:, list(ml_train_df.columns[2:(len(ml_train_df.columns)-1)])].to_numpy().T
             y_val_flatten_channel = val_df.loc[:, ml_train_df.columns[-1]].to_numpy().T
 
-            x_test_flatten_channel = test_df.loc[:, list(test_df.columns[2:12])].to_numpy().T
+            x_test_flatten_channel = test_df.loc[:, list(test_df.columns[2:(len(ml_train_df.columns)-1)])].to_numpy().T
             y_test_flatten_channel = test_df.loc[:, test_df.columns[-1]].to_numpy().T
 
 

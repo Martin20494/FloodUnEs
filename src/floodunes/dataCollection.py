@@ -960,8 +960,8 @@ class dataCollection:
         slope_IN = self.slope_input('slope_riserun')
         # 6. Roughness
         roughness_IN = self.roughness_input()
-        # 7. Curvature
-        curvature_IN = self.curvature_input()
+        # # 7. Curvature
+        # curvature_IN = self.curvature_input()
         # 8. Flow accumulation
         flowaccumulation_IN = self.flowaccumulation_input()
         # 9. Proportion label
@@ -987,7 +987,7 @@ class dataCollection:
             'depth',
             'slope',
             'roughness',
-            'curvature',
+            # 'curvature',
             'flowaccumulation',
             'proportionlabel',
             'proportionproximity',
@@ -1000,7 +1000,7 @@ class dataCollection:
             depth_IN,
             slope_IN,
             roughness_IN,
-            curvature_IN,
+            # curvature_IN,
             flowaccumulation_IN,
             proportionlabel_IN,
             proportionproximity_IN,
@@ -1159,8 +1159,8 @@ class dataCollection:
             slope_IN = self.slope_input('slope_riserun')
             # 6. Roughness
             roughness_IN = self.roughness_input()
-            # 7. Curvature
-            curvature_IN = self.curvature_input()
+            # # 7. Curvature
+            # curvature_IN = self.curvature_input()
             # 8. Flow accumulation
             flowaccumulation_IN = self.flowaccumulation_input()
             # 9. Proportion label
@@ -1186,7 +1186,7 @@ class dataCollection:
                 'depth',
                 'slope',
                 'roughness',
-                'curvature',
+                # 'curvature',
                 'flowaccumulation',
                 'proportionlabel',
                 'proportionproximity',
@@ -1199,7 +1199,7 @@ class dataCollection:
                 depth_IN,
                 slope_IN,
                 roughness_IN,
-                curvature_IN,
+                # curvature_IN,
                 flowaccumulation_IN,
                 proportionlabel_IN,
                 proportionproximity_IN,
