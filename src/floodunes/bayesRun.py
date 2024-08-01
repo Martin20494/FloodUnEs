@@ -389,7 +389,7 @@ class runBayesClassification():
             train_loss_total /= len(self.trainloader.dataset)
             val_loss_total /= len(self.valloader.dataset)
 
-            if epoch >= checkpoint['epoch'] + 100:
+            if epoch >= checkpoint['epoch']:
                 torch.save({
                     'epoch': epoch,
                     'train_loss_total': train_loss_total,
