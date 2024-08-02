@@ -956,12 +956,14 @@ class dataCollection:
         hanf_IN = self.hanf_input()
         # 4. Depth
         depth_IN = self.depth_input()
+        # 4. Depth label
+        depthlabel_IN = self.depthlabel_input()
         # 5. Slope
         slope_IN = self.slope_input('slope_riserun')
         # 6. Roughness
         roughness_IN = self.roughness_input()
-        # # 7. Curvature
-        # curvature_IN = self.curvature_input()
+        # 7. Curvature
+        curvature_IN = self.curvature_input()
         # 8. Flow accumulation
         flowaccumulation_IN = self.flowaccumulation_input()
         # 9. Proportion label
@@ -985,9 +987,10 @@ class dataCollection:
         para_names_list = [
             'hanf',
             'depth',
+            'depth_label',
             'slope',
             'roughness',
-            # 'curvature',
+            'curvature',
             'flowaccumulation',
             'proportionlabel',
             'proportionproximity',
@@ -998,9 +1001,10 @@ class dataCollection:
         para_values_list = [
             hanf_IN,
             depth_IN,
+            depthlabel_IN,
             slope_IN,
             roughness_IN,
-            # curvature_IN,
+            curvature_IN,
             flowaccumulation_IN,
             proportionlabel_IN,
             proportionproximity_IN,
@@ -1155,12 +1159,14 @@ class dataCollection:
             hanf_IN = self.hanf_input()
             # 4. Depth
             depth_IN = self.depth_input()
+            # 4. Depth label
+            depthlabel_IN = self.depthlabel_input()
             # 5. Slope
             slope_IN = self.slope_input('slope_riserun')
             # 6. Roughness
             roughness_IN = self.roughness_input()
-            # # 7. Curvature
-            # curvature_IN = self.curvature_input()
+            # 7. Curvature
+            curvature_IN = self.curvature_input()
             # 8. Flow accumulation
             flowaccumulation_IN = self.flowaccumulation_input()
             # 9. Proportion label
@@ -1184,9 +1190,10 @@ class dataCollection:
             para_names_list = [
                 'hanf',
                 'depth',
+                'depth_label',
                 'slope',
                 'roughness',
-                # 'curvature',
+                'curvature',
                 'flowaccumulation',
                 'proportionlabel',
                 'proportionproximity',
@@ -1197,9 +1204,10 @@ class dataCollection:
             para_values_list = [
                 hanf_IN,
                 depth_IN,
+                depthlabel_IN,
                 slope_IN,
                 roughness_IN,
-                # curvature_IN,
+                curvature_IN,
                 flowaccumulation_IN,
                 proportionlabel_IN,
                 proportionproximity_IN,
