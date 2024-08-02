@@ -543,7 +543,7 @@ class runBayesRegressionProportion():
     def __init__(self,
                  parameter_path,
                  setseed=2,
-                 number_layers=11,
+                 number_layers=9,
                  lr=0.001,
                  batchsize=3200,
                  num_workers=1,
@@ -590,6 +590,12 @@ class runBayesRegressionProportion():
         self.trainloader = trainloader
         self.valloader = valloader
         self.testloader = testloader
+
+        for i, (train, label) in enumerate(self.trainloader):
+            print("i: ", i)
+            print("train: ", train.shape)
+            print("label: ", label.shape)
+            print("---------------")
 
         # Set up layers and model
         self.number_layers = number_layers
@@ -815,7 +821,7 @@ class runBayesRegressionSD():
     def __init__(self,
                  parameter_path,
                  setseed=2,
-                 number_layers=8,
+                 number_layers=9,
                  lr=0.001,
                  batchsize=3200,
                  num_workers=1,
@@ -1240,7 +1246,7 @@ class runTestExtra():
 
     def testextra_proportion_regression_model(self,
                                              model_path,
-                                             number_layers=11
+                                             number_layers=8
                                              ):
 
         # Create path
