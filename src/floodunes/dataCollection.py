@@ -490,7 +490,7 @@ class dataCollection:
         dem_curvature = rd.LoadGDAL(fr"{self.general_folder}/for_richdem.tiff")
 
         # Get curvature
-        curvature = rd.TerrainAttribute(dem_curvature, attrib='curvature')
+        curvature = rd.TerrainAttribute(dem_curvature, attrib='profile_curvature')
 
         # Reshape the curvature
         curvature_reshape = curvature.reshape(-1, curvature.shape[0], curvature.shape[1])
