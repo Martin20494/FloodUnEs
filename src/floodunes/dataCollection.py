@@ -964,6 +964,8 @@ class dataCollection:
         roughness_IN = self.roughness_input()
         # 7. Curvature
         curvature_IN = self.curvature_input()
+        # 8. Sobel edge label
+        sobeledgelabel_IN = self.sobeledgelabel_input()
         # 8. Flow accumulation
         flowaccumulation_IN = self.flowaccumulation_input()
         # 9. Proportion label
@@ -991,6 +993,7 @@ class dataCollection:
             'slope',
             'roughness',
             'curvature',
+            'sobeledgelabel',
             'flowaccumulation',
             'proportionlabel',
             'proportionproximity',
@@ -1005,6 +1008,7 @@ class dataCollection:
             slope_IN,
             roughness_IN,
             curvature_IN,
+            sobeledgelabel_IN,
             flowaccumulation_IN,
             proportionlabel_IN,
             proportionproximity_IN,
@@ -1167,6 +1171,8 @@ class dataCollection:
             roughness_IN = self.roughness_input()
             # 7. Curvature
             curvature_IN = self.curvature_input()
+            # 5. Sobel edge labels
+            sobeledgelabel_IN = self.sobeledgelabel_input()
             # 8. Flow accumulation
             flowaccumulation_IN = self.flowaccumulation_input()
             # 9. Proportion label
@@ -1194,6 +1200,7 @@ class dataCollection:
                 'slope',
                 'roughness',
                 'curvature',
+                'sobeledgelabel',
                 'flowaccumulation',
                 'proportionlabel',
                 'proportionproximity',
@@ -1208,6 +1215,7 @@ class dataCollection:
                 slope_IN,
                 roughness_IN,
                 curvature_IN,
+                sobeledgelabel_IN,
                 flowaccumulation_IN,
                 proportionlabel_IN,
                 proportionproximity_IN,
