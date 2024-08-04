@@ -956,16 +956,12 @@ class dataCollection:
         hanf_IN = self.hanf_input()
         # 4. Depth
         depth_IN = self.depth_input()
-        # # 4. Depth label
-        # depthlabel_IN = self.depthlabel_input()
         # 5. Slope
         slope_IN = self.slope_input('slope_riserun')
         # 6. Roughness
         roughness_IN = self.roughness_input()
         # 7. Curvature
         curvature_IN = self.curvature_input()
-        # 8. Sobel edge label
-        sobeledgelabel_IN = self.sobeledgelabel_input()
         # 8. Flow accumulation
         flowaccumulation_IN = self.flowaccumulation_input()
         # 9. Proportion label
@@ -975,8 +971,6 @@ class dataCollection:
             proportionlabel_IN = self.proportionlabel_train_input(fortrain=False)
         # 10. Proportion proximity
         proportionproximity_IN = self.proportionproximity_input()
-        # # 11. Proximity difference
-        # proximitydifference_IN = self.proximitydifference_input()
         # 12. Proportion
         proportion_OUT = self.proportion_output()
 
@@ -989,30 +983,24 @@ class dataCollection:
         para_names_list = [
             'hanf',
             'depth',
-            # 'depth_label',
             'slope',
             'roughness',
             'curvature',
-            'sobeledgelabel',
             'flowaccumulation',
             'proportionlabel',
             'proportionproximity',
-            # 'proximitydifference',
             'proportion'
         ]
         # Get list of para values. Start from 'hanf'
         para_values_list = [
             hanf_IN,
             depth_IN,
-            # depthlabel_IN,
             slope_IN,
             roughness_IN,
             curvature_IN,
-            sobeledgelabel_IN,
             flowaccumulation_IN,
             proportionlabel_IN,
             proportionproximity_IN,
-            # proximitydifference_IN,
             proportion_OUT
         ]
 
@@ -1163,16 +1151,12 @@ class dataCollection:
             hanf_IN = self.hanf_input()
             # 4. Depth
             depth_IN = self.depth_input()
-            # # 4. Depth label
-            # depthlabel_IN = self.depthlabel_input()
             # 5. Slope
             slope_IN = self.slope_input('slope_riserun')
             # 6. Roughness
             roughness_IN = self.roughness_input()
             # 7. Curvature
             curvature_IN = self.curvature_input()
-            # 5. Sobel edge labels
-            sobeledgelabel_IN = self.sobeledgelabel_input()
             # 8. Flow accumulation
             flowaccumulation_IN = self.flowaccumulation_input()
             # 9. Proportion label
@@ -1180,10 +1164,8 @@ class dataCollection:
                 proportionlabel_IN = self.proportionlabel_train_input()
             else:
                 proportionlabel_IN = self.proportionlabel_train_input(fortrain=False)
-            # # 10. Proportion proximity
-            # proportionproximity_IN = self.proportionproximity_input()
-            # 11. Proximity difference
-            proximitydifference_IN = self.proximitydifference_input()
+            # 10. Proportion proximity
+            proportionproximity_IN = self.proportionproximity_input()
             # 12. Proportion
             proportion_OUT = self.proportion_output()
 
@@ -1196,30 +1178,24 @@ class dataCollection:
             para_names_list = [
                 'hanf',
                 'depth',
-                # 'depth_label',
                 'slope',
                 'roughness',
                 'curvature',
-                'sobeledgelabel',
                 'flowaccumulation',
                 'proportionlabel',
                 'proportionproximity',
-                # 'proximitydifference',
                 'proportion'
             ]
             # Get list of para values. Start from 'hanf'
             para_values_list = [
                 hanf_IN,
                 depth_IN,
-                # depthlabel_IN,
                 slope_IN,
                 roughness_IN,
                 curvature_IN,
-                sobeledgelabel_IN,
                 flowaccumulation_IN,
                 proportionlabel_IN,
-                # proportionproximity_IN,
-                proximitydifference_IN,
+                proportionproximity_IN,
                 proportion_OUT
             ]
 
