@@ -740,6 +740,17 @@ class runBayesRegressionProportion():
                         'val_loss_total': val_loss_total,
                         'optimizer_state_dict': retrain_model_optimizer.state_dict(),
                         'model_state_dict': retrain_model.state_dict()
+                    }, fr"{self.train_folder}/trained_model_decrease_{epoch}.pt")
+                    torch.save(retrain_model, fr"{self.train_folder}/full_model.pth")
+            else:
+                min_val_loss = val_loss_total
+                if epoch >= checkpoint['epoch']:  # +100
+                    torch.save({
+                        'epoch': epoch,
+                        'train_loss_total': train_loss_total,
+                        'val_loss_total': val_loss_total,
+                        'optimizer_state_dict': retrain_model_optimizer.state_dict(),
+                        'model_state_dict': retrain_model.state_dict()
                     }, fr"{self.train_folder}/trained_model_{epoch}.pt")
                     torch.save(retrain_model, fr"{self.train_folder}/full_model.pth")
 
