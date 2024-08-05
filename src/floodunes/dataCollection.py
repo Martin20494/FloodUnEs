@@ -670,7 +670,9 @@ class dataCollection:
             # Write out
             proximity_difference.rio.write_crs(2193)
             proximity_difference.rio.write_nodata(-9999)
-            proximity_difference.rio.to_raster(fr"{self.general_folder}/proportionproximity_regression_input_domain.nc")
+            proximity_difference.rio.to_raster(
+                fr"{self.general_folder}/proportionproximitydiff_regression_input_domain.nc"
+            )
 
             return proximity_difference.values.flatten()
 
@@ -954,8 +956,8 @@ class dataCollection:
         elev_IN = self.dem_input()
         # 3. HANF
         hanf_IN = self.hanf_input()
-        # # 4. Depth
-        # depth_IN = self.depth_input()
+        # 4. Depth
+        depth_IN = self.depth_input()
         # 4. Depth label
         depthlabel_IN = self.depthlabel_input()
         # 5. Slope
@@ -964,6 +966,8 @@ class dataCollection:
         roughness_IN = self.roughness_input()
         # 7. Curvature
         curvature_IN = self.curvature_input()
+        # 8. Sobel edge label
+        sobeledgelabel_IN = self.sobeledgelabel_input()
         # 8. Flow accumulation
         flowaccumulation_IN = self.flowaccumulation_input()
         # 9. Proportion label
@@ -984,11 +988,12 @@ class dataCollection:
         # Get name list for each para. Start from 'hanf'
         para_names_list = [
             'hanf',
-            # 'depth',
+            'depth',
             'depth_label',
             'slope',
             'roughness',
             'curvature',
+            'sobeledgelabel',
             'flowaccumulation',
             'proportionlabel',
             'proportionproximity',
@@ -997,11 +1002,12 @@ class dataCollection:
         # Get list of para values. Start from 'hanf'
         para_values_list = [
             hanf_IN,
-            # depth_IN,
+            depth_IN,
             depthlabel_IN,
             slope_IN,
             roughness_IN,
             curvature_IN,
+            sobeledgelabel_IN,
             flowaccumulation_IN,
             proportionlabel_IN,
             proportionproximity_IN,
@@ -1153,8 +1159,8 @@ class dataCollection:
             elev_IN = self.dem_input()
             # 3. HANF
             hanf_IN = self.hanf_input()
-            # # 4. Depth
-            # depth_IN = self.depth_input()
+            # 4. Depth
+            depth_IN = self.depth_input()
             # 4. Depth label
             depthlabel_IN = self.depthlabel_input()
             # 5. Slope
@@ -1163,6 +1169,8 @@ class dataCollection:
             roughness_IN = self.roughness_input()
             # 7. Curvature
             curvature_IN = self.curvature_input()
+            # 8. Sobel edge label
+            sobeledgelabel_IN = self.sobeledgelabel_input()
             # 8. Flow accumulation
             flowaccumulation_IN = self.flowaccumulation_input()
             # 9. Proportion label
@@ -1183,11 +1191,12 @@ class dataCollection:
             # Get name list for each para. Start from 'hanf'
             para_names_list = [
                 'hanf',
-                # 'depth',
+                'depth',
                 'depthlabel',
                 'slope',
                 'roughness',
                 'curvature',
+                'sobeledgelabel',
                 'flowaccumulation',
                 'proportionlabel',
                 'proportionproximity',
@@ -1196,11 +1205,12 @@ class dataCollection:
             # Get list of para values. Start from 'hanf'
             para_values_list = [
                 hanf_IN,
-                # depth_IN,
+                depth_IN,
                 depthlabel_IN,
                 slope_IN,
                 roughness_IN,
                 curvature_IN,
+                sobeledgelabel_IN,
                 flowaccumulation_IN,
                 proportionlabel_IN,
                 proportionproximity_IN,
