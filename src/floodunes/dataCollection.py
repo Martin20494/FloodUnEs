@@ -954,8 +954,8 @@ class dataCollection:
         elev_IN = self.dem_input()
         # 3. HANF
         hanf_IN = self.hanf_input()
-        # 4. Depth
-        depth_IN = self.depth_input()
+        # # 4. Depth
+        # depth_IN = self.depth_input()
         # 4. Depth label
         depthlabel_IN = self.depthlabel_input()
         # 5. Slope
@@ -984,7 +984,7 @@ class dataCollection:
         # Get name list for each para. Start from 'hanf'
         para_names_list = [
             'hanf',
-            'depth',
+            # 'depth',
             'depth_label',
             'slope',
             'roughness',
@@ -997,7 +997,7 @@ class dataCollection:
         # Get list of para values. Start from 'hanf'
         para_values_list = [
             hanf_IN,
-            depth_IN,
+            # depth_IN,
             depthlabel_IN,
             slope_IN,
             roughness_IN,
@@ -1153,8 +1153,8 @@ class dataCollection:
             elev_IN = self.dem_input()
             # 3. HANF
             hanf_IN = self.hanf_input()
-            # 4. Depth
-            depth_IN = self.depth_input()
+            # # 4. Depth
+            # depth_IN = self.depth_input()
             # 4. Depth label
             depthlabel_IN = self.depthlabel_input()
             # 5. Slope
@@ -1183,7 +1183,7 @@ class dataCollection:
             # Get name list for each para. Start from 'hanf'
             para_names_list = [
                 'hanf',
-                'depth',
+                # 'depth',
                 'depthlabel',
                 'slope',
                 'roughness',
@@ -1196,7 +1196,7 @@ class dataCollection:
             # Get list of para values. Start from 'hanf'
             para_values_list = [
                 hanf_IN,
-                depth_IN,
+                # depth_IN,
                 depthlabel_IN,
                 slope_IN,
                 roughness_IN,

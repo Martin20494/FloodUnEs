@@ -543,7 +543,7 @@ class runBayesRegressionProportion():
     def __init__(self,
                  parameter_path,
                  setseed=2,
-                 number_layers=10,
+                 number_layers=9,
                  lr=0.001,
                  batchsize=3200,
                  num_workers=1,
@@ -1257,7 +1257,7 @@ class runTestExtra():
 
     def testextra_proportion_regression_model(self,
                                              model_path,
-                                             number_layers=10
+                                             number_layers=9
                                              ):
 
         # Create path
