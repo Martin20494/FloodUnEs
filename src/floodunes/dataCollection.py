@@ -1014,6 +1014,7 @@ class dataCollection:
             flowaccumulation_IN,
             proportionlabel_IN,
             proportionproximity_IN,
+            proximitydifference_IN,
             proportion_OUT
         ]
 
