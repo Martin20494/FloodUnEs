@@ -977,6 +977,8 @@ class dataCollection:
             proportionlabel_IN = self.proportionlabel_train_input(fortrain=False)
         # 10. Proportion proximity
         proportionproximity_IN = self.proportionproximity_input()
+        # 11. Proximity difference
+        proximitydifference_IN = self.proximitydifference_input()
         # 12. Proportion
         proportion_OUT = self.proportion_output()
 
@@ -997,6 +999,7 @@ class dataCollection:
             'flowaccumulation',
             'proportionlabel',
             'proportionproximity',
+            'proximitydifference',
             'proportion'
         ]
         # Get list of para values. Start from 'hanf'
@@ -1180,6 +1183,8 @@ class dataCollection:
                 proportionlabel_IN = self.proportionlabel_train_input(fortrain=False)
             # 10. Proportion proximity
             proportionproximity_IN = self.proportionproximity_input()
+            # 11. Proximity difference
+            proximitydifference_IN = self.proximitydifference_input()
             # 12. Proportion
             proportion_OUT = self.proportion_output()
 
@@ -1200,6 +1205,7 @@ class dataCollection:
                 'flowaccumulation',
                 'proportionlabel',
                 'proportionproximity',
+                'proximitydifference',
                 'proportion'
             ]
             # Get list of para values. Start from 'hanf'
@@ -1214,6 +1220,7 @@ class dataCollection:
                 flowaccumulation_IN,
                 proportionlabel_IN,
                 proportionproximity_IN,
+                proximitydifference_IN,
                 proportion_OUT
             ]
 
