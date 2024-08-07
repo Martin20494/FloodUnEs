@@ -543,7 +543,7 @@ class runBayesRegressionProportion():
     def __init__(self,
                  parameter_path,
                  setseed=2,
-                 number_layers=11,
+                 number_layers=12,
                  lr=0.001,
                  batchsize=3200,
                  num_workers=1,
@@ -743,7 +743,7 @@ class runBayesRegressionProportion():
                     }, fr"{self.train_folder}/trained_model_decrease_{epoch}.pt")
                     torch.save(retrain_model, fr"{self.train_folder}/full_model.pth")
             else:
-                min_val_loss = val_loss_total
+
                 if epoch >= checkpoint['epoch']:  # +100
                     torch.save({
                         'epoch': epoch,
@@ -1133,7 +1133,7 @@ class runTestExtra():
 
     def testextra_proportion_classification_model(self,
                                                  model_path,
-                                                 number_layers=10
+                                                 number_layers=8
                                                  ):
         # Create path
         Path(
@@ -1257,7 +1257,7 @@ class runTestExtra():
 
     def testextra_proportion_regression_model(self,
                                              model_path,
-                                             number_layers=11
+                                             number_layers=12
                                              ):
 
         # Create path
