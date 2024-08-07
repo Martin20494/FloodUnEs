@@ -690,7 +690,8 @@ class runBayesRegressionProportion():
         retrain_model_optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
         # Set initial validation loss
-        min_val_loss = checkpoint['val_loss_total']
+        # min_val_loss = checkpoint['val_loss_total']
+        min_val_loss = np.Inf
 
         # Prepare result file
         with open(fr"{self.train_folder}/result_retrained_regression_proportion.csv", 'w+', newline='') as f_out:
